@@ -5,7 +5,6 @@ import type { IJWPlayerInstance } from './types/window';
 import type { TRollsHandler } from './advertisement/types';
 import type { IInitJWOptions, IJWPlayerConfig, ISetupJWOptions } from './types';
 
-import { getPrebidTag } from './advertisement/prebidtag';
 // import { isTest } from 'frontend/shared/util/environment';
 import { rollsHandler } from './advertisement/rollshandler';
 import { FloatingPlayer, getFloatingPlayer } from './followplayer';
@@ -60,26 +59,30 @@ export class JWVideo {
 		}
 	}
 
-	private configurePlayer = async ({
-		// actAsPlay,
-		// articleId,
-		autoPause = true,
-		cookieless,
-		// environment,
-		// fetchPlaylist,
-		floatingOptions = { articleTitleLength: 0, floatAllowed: false },
-		imageUrl,
-		isSmartphone,
-		libraryDNS,
-		maxResolution,
-		playerElementId,
-		playerParent,
-		recommendationId,
-		title,
-		clipId,
-		volume,
-		rollsObject
-	}: ISetupJWOptions) => {
+	private configurePlayer = async (configObject: ISetupJWOptions) => {
+		const {
+			// actAsPlay,
+			// articleId,
+			autoPause = true,
+			autoplayAllowed,
+			cookieless,
+			// environment,
+			// fetchPlaylist,
+			floatingOptions = { articleTitleLength: 0, floatAllowed: false },
+			imageUrl,
+			isSmartphone,
+			libraryDNS,
+			maxResolution,
+			playerElementId,
+			playerParent,
+			recommendationId,
+			title,
+			clipId,
+			volume,
+			rollsFunction
+		} = configObject;
+		let { autoplayAllowed } = configObject;
+
 		await this.blockUntilLoaded();
 
 		if (!window.jwplayer) {
@@ -93,8 +96,6 @@ export class JWVideo {
 		}
 
 		const jwPlayerInstance = window.jwplayer(playerElementId);
-
-		let { autoplayAllowed } = rollsObject;
 
 		const { articleTitleLength, floatAllowed } = floatingOptions;
 		const floating = getFloatingPlayer(floatAllowed);
@@ -129,12 +130,13 @@ export class JWVideo {
 		 */
 		let blockAutoPlayOnAdError = false;
 		let vpaValue = 'click';
+		let isCtp = true;
 		if (autoplayAllowed) {
 			jwOptions.autostart = 'viewable';
 			jwOptions.mute = true;
 			blockAutoPlayOnAdError = true;
 			vpaValue = 'auto';
-			rollsObject.isCtp = false;
+			isCtp = false;
 		} else {
 			jwOptions.autostart = false;
 			// Add poster video for non-autoplay videos
@@ -143,7 +145,7 @@ export class JWVideo {
 				type: 'video/mp4',
 				width: 640
 			});
-			rollsObject.isCtp = true;
+			isCtp = true;
 		}
 
 		if (location.hash === '#autoplay') {
@@ -154,7 +156,7 @@ export class JWVideo {
 		}
 		// END Autoplay
 
-		const advertisingOptions = await rollsHandler(rollsObject);
+		const advertisingOptions = await rollsFunction(isCtp);
 		jwOptions.advertising = advertisingOptions ? advertisingOptions.advertisingObject : {};
 		if (!rollsObject.disableRolls) {
 			console.log('Rolls object', vpaValue);
@@ -238,33 +240,6 @@ export class JWVideo {
 			autoplayAllowed = false;
 		});
 
-		/*
-		 * LiveWrapped setup
-		 */
-		if (!rollsObject.disableRolls) {
-			if (jwOptions.advertising && Object.keys(jwOptions.advertising).length) {
-				if (jwOptions.advertising.schedule) {
-					// Callback which performs header bidding.
-					jwPlayerInstance.setPlaylistItemCallback(async (item: any) => {
-						const tag = await getPrebidTag(
-							jwOptions.advertising.schedule,
-							playerElementId,
-							advertisingOptions
-						);
-
-						return Object.assign({}, item, {
-							adschedule: [
-								{
-									offset: 'pre',
-									tag
-								}
-							]
-						});
-					});
-				}
-			}
-		}
-
 		return { blockAutoPlayOnAdError, jwPlayerInstance };
 	};
 
@@ -302,7 +277,7 @@ export class JWVideo {
 	private async setupJWPlayer(playerOptions: IInitJWOptions) {
 		try {
 			const {
-				actAsPlay,
+				// actAsPlay,
 				autoPlay,
 				articleId,
 				cookieless,
@@ -316,7 +291,7 @@ export class JWVideo {
 
 			const autoplayAllowed = location.hash === '#autoplay' || autoPlay;
 			const rollsObject = {
-				actAsPlay,
+				// actAsPlay,
 				articleId,
 				autoplayAllowed,
 				cookieless,

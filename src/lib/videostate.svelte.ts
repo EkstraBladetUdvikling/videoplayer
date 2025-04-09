@@ -1,8 +1,6 @@
-interface IVideoState {
-	floatingUsed: boolean;
-	players: HTMLDivElement[];
+export class VideoState {
+	floatingUsed: boolean = $state(false);
+	players: HTMLDivElement[] = $state([]);
 }
-export const videoState: IVideoState = {
-	floatingUsed: $state(false),
-	players: $state([])
-};
+
+export const videoState = new VideoState();

@@ -1,6 +1,3 @@
-import type { ENVIRONMENT } from 'frontend/shared/util/environment';
-import type { TRollsHandler } from './advertisement/types';
-
 export interface IEBjwLive {
 	channelId: string;
 	libraryDNS: string;
@@ -36,7 +33,7 @@ export interface IInitJWOptions {
 	clipId: string;
 	cookieless: boolean;
 	duration: string;
-	environment: ENVIRONMENT;
+	environment: 'prod' | 'staging' | 'dev';
 	fetchPlaylist: boolean;
 	floatingOptions?: IFloatingInitOptions;
 	imageUrl: string;
@@ -58,42 +55,11 @@ export interface IInitJWOptions {
 	playerId: string;
 }
 
-export interface IJWVideoOptions {
-	initJWOptions: Partial<IInitJWOptions>;
-	libraryDNS: string;
-	playerId: string;
-}
-
-interface IJWautoPause {
-	pauseAds?: boolean;
-	viewability?: boolean;
-}
-
-export interface IJWPlayerConfig {
-	advertising: any;
-	aspectratio?: string;
-	autoPause: IJWautoPause;
-	autostart: string | boolean;
-	controls?: boolean;
-	displaydescription?: boolean;
-	displaytitle?: boolean;
-	doNotSaveCookies: boolean;
-	file: string;
-	floating: any;
-	image: string;
-	mute: boolean;
-	playlist: any;
-	preload: string;
-	related: any;
-	repeat: boolean;
-	volume: number;
-}
-
 type IFloatingOptions = Pick<IInitJWOptions, 'isSmartphone' | 'playerParent'> &
 	IFloatingInitOptions;
 
 export interface IFloatingPlayerOptions extends IFloatingOptions {
-	jwPlayerInstance: any;
+	jwPlayerInstance: jwplayer.JWPlayer;
 	playerElementId: string;
 }
 
@@ -105,5 +71,5 @@ export interface IMessageOptions {
 }
 
 export interface ISetupJWOptions extends IInitJWOptions {
-	rollsObject: TRollsHandler;
+	rollsFunction: () => Promise<void>;
 }

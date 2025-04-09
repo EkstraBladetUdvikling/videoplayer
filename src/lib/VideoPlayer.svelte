@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import { page } from '$app/state';
+	import VideoHandler from '$lib';
 	import { onMount } from 'svelte';
 
 	const { jwMaxResolution, jwLibraryDNS, jwPlayerId } = page.data;
@@ -17,39 +17,39 @@
 
 	let playerParent: HTMLDivElement;
 	let playerElement: HTMLDivElement;
+	const playerElementId = `jwVideo_${clipId}`;
 
 	onMount(() => {
 		const video = {
-			initJWOptions: {
-				allowFloating: true,
+			initObjectJW: {
 				articleId: '',
-				autoPause: true,
-				autoPlay: true,
+				// autoPause: true,
 				clipId,
-				cookieless: false,
 				duration: '200',
-				environment: 'desktop',
 				fetchPlaylist: false,
 				imageUrl: 'string',
 				inline: false,
 				isDiscovery: false,
 				isLive: false,
-				isSmartphone: false,
+				libraryDNS: jwLibraryDNS,
 				maxResolution: jwMaxResolution,
 				playerElement,
-				// playerElementId: string;
+				playerElementId,
+				playerId: jwPlayerId,
 				playerParent,
 				title: 'Title'
 			},
-			libraryDNS: jwLibraryDNS,
-			playerId: jwPlayerId
+			autoPlayAllowed: true,
+			disableRolls: false,
+			floatingAllowed: true
 		};
 		console.log('video', video);
+		new VideoHandler(video);
 	});
 </script>
 
 <div bind:this={playerParent} id="videoPlayerParent" class="video-container {device.toLowerCase()}">
-	<div bind:this={playerElement} class="video-container"></div>
+	<div bind:this={playerElement} id={playerElementId} class="video-container"></div>
 
 	{#if allowFloating && device !== 'smartphone'}
 		<div class="jw-floating-container">

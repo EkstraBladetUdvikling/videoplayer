@@ -1,7 +1,6 @@
 import { blockUntilLoaded } from './blockuntilloaded';
 import { getLiveEvents } from 'frontend/svelte-sharedstore/video/queries';
 import { rollsHandler } from './advertisement/rollshandler';
-import { trackVideo } from './analytics-live/trackvideo';
 import { FloatingPlayer, getFloatingPlayer } from './followplayer';
 
 import type { IJWPlayerInstance } from '../types';
