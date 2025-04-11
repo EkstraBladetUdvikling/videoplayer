@@ -1,3 +1,5 @@
+import type { IRollsHandlerReturn } from './rolls/rollshandler';
+
 export interface IEBjwLive {
 	channelId: string;
 	libraryDNS: string;
@@ -48,15 +50,14 @@ export interface IInitJWOptions {
 	playerElementId: string;
 	playerParent: HTMLDivElement;
 	recommendationId?: string;
-	rollOptions: IRollOptions;
 	title: string;
 	volume: number;
 	libraryDNS: string;
 	playerId: string;
+	rollsData: IRollsHandlerReturn | null;
 }
 
-type IFloatingOptions = Pick<IInitJWOptions, 'isSmartphone' | 'playerParent'> &
-	IFloatingInitOptions;
+type IFloatingOptions = Pick<IInitJWOptions, 'playerParent'> & IFloatingInitOptions;
 
 export interface IFloatingPlayerOptions extends IFloatingOptions {
 	jwPlayerInstance: jwplayer.JWPlayer;
@@ -71,5 +72,5 @@ export interface IMessageOptions {
 }
 
 export interface ISetupJWOptions extends IInitJWOptions {
-	rollsFunction: () => Promise<void>;
+	autoplayAllowed: boolean;
 }

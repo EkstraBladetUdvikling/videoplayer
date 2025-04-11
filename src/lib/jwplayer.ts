@@ -1,16 +1,16 @@
 import { messageForUser } from './messageforuser';
 
-import type { IJWPlayerInstance } from './types/window';
 // import type { IVideoHistoryState } from 'frontend/history/history';
-import type { TRollsHandler } from './advertisement/types';
-import type { IInitJWOptions, IJWPlayerConfig, ISetupJWOptions } from './types';
+
+import type { IInitJWOptions, ISetupJWOptions } from './types';
 
 // import { isTest } from 'frontend/shared/util/environment';
-import { rollsHandler } from './advertisement/rollshandler';
+
 import { FloatingPlayer, getFloatingPlayer } from './followplayer';
+import { liveWrapped } from './rolls/livewrapped';
 
 export class JWVideo {
-	private jwPlayerInstance: IJWPlayerInstance | null = null;
+	private jwPlayerInstance: jwplayer.JWPlayer | null = null;
 
 	constructor(initOptions: IInitJWOptions) {
 		try {
@@ -64,13 +64,12 @@ export class JWVideo {
 			// actAsPlay,
 			// articleId,
 			autoPause = true,
-			autoplayAllowed,
 			cookieless,
 			// environment,
 			// fetchPlaylist,
 			floatingOptions = { articleTitleLength: 0, floatAllowed: false },
 			imageUrl,
-			isSmartphone,
+
 			libraryDNS,
 			maxResolution,
 			playerElementId,
@@ -79,7 +78,7 @@ export class JWVideo {
 			title,
 			clipId,
 			volume,
-			rollsFunction
+			rollsData
 		} = configObject;
 		let { autoplayAllowed } = configObject;
 
@@ -110,7 +109,7 @@ export class JWVideo {
 		const body = await response.json();
 		body.playlist[0].title = title;
 
-		const jwOptions: Partial<IJWPlayerConfig> = {
+		const jwOptions: Partial<jwplayer.PlayerConfig> = {
 			floating,
 			image: imageUrl,
 			playlist: body.playlist
@@ -130,22 +129,20 @@ export class JWVideo {
 		 */
 		let blockAutoPlayOnAdError = false;
 		let vpaValue = 'click';
-		let isCtp = true;
 		if (autoplayAllowed) {
 			jwOptions.autostart = 'viewable';
 			jwOptions.mute = true;
 			blockAutoPlayOnAdError = true;
 			vpaValue = 'auto';
-			isCtp = false;
 		} else {
 			jwOptions.autostart = false;
 			// Add poster video for non-autoplay videos
-			jwOptions.playlist[0].images.push({
+			const firstItem = body.playlist[0];
+			firstItem.images.push({
 				src: `https://cdn.jwplayer.com/v2/media/${clipId}/poster.mp4?width=640`,
 				type: 'video/mp4',
 				width: 640
 			});
-			isCtp = true;
 		}
 
 		if (location.hash === '#autoplay') {
@@ -156,12 +153,25 @@ export class JWVideo {
 		}
 		// END Autoplay
 
-		const advertisingOptions = await rollsFunction(isCtp);
-		jwOptions.advertising = advertisingOptions ? advertisingOptions.advertisingObject : {};
-		if (!rollsObject.disableRolls) {
-			console.log('Rolls object', vpaValue);
-			// TODO: window.ebComponents.ebBanners.updateORTBData({ vpa: vpaValue });
-		}
+		// jwOptions.advertising = advertisingOptions ?? {};
+		console.log('Advertising options', vpaValue);
+		console.log('rollsData', rollsData);
+		console.log('rollsData', window.jwplayer, window.jwplayer?.defaults.advertising);
+
+		const defaultAdvertising = window.jwplayer?.defaults.advertising ?? {};
+		jwOptions.advertising = rollsData
+			? {
+					...defaultAdvertising,
+					...rollsData.advertisingObject
+				}
+			: defaultAdvertising;
+
+		console.log('jwOptions', jwOptions.advertising);
+
+		// if (!rollsObject.disableRolls) {
+		// 	console.log('Rolls object', vpaValue);
+		// 	// TODO: window.ebComponents.ebBanners.updateORTBData({ vpa: vpaValue });
+		// }
 		/* We load the data from a .json file from backend to secure
 		 * JW's .related onPlay listener works properly
 		 */
@@ -229,7 +239,6 @@ export class JWVideo {
 			new FloatingPlayer({
 				articleTitleLength,
 				floatAllowed,
-				isSmartphone,
 				jwPlayerInstance,
 				playerElementId,
 				playerParent
@@ -240,12 +249,13 @@ export class JWVideo {
 			autoplayAllowed = false;
 		});
 
+		liveWrapped(jwOptions.advertising, jwPlayerInstance, playerElementId, rollsData?.urlFragments);
+
 		return { blockAutoPlayOnAdError, jwPlayerInstance };
 	};
 
 	private async resetPlayer(
 		playerOptions: IInitJWOptions,
-		rollsObject: TRollsHandler,
 		isAutoPlay: boolean
 		// state?: IVideoHistoryState
 	) {
@@ -265,10 +275,7 @@ export class JWVideo {
 
 			const { jwPlayerInstance: newJwPlayerInstance } = await this.configurePlayer({
 				...playerOptions,
-				rollsObject: {
-					...rollsObject,
-					autoplayAllowed: isAutoPlay
-				}
+				autoplayAllowed: isAutoPlay
 			});
 			if (newJwPlayerInstance) this.jwPlayerInstance = newJwPlayerInstance;
 		}
@@ -279,36 +286,17 @@ export class JWVideo {
 			const {
 				// actAsPlay,
 				autoPlay,
-				articleId,
-				cookieless,
-				inline,
-				isDiscovery,
-				isSmartphone,
-				playerElement,
-				playerParent,
-				rollOptions
+				playerElement
 			} = playerOptions;
 
 			const autoplayAllowed = location.hash === '#autoplay' || autoPlay;
-			const rollsObject = {
-				// actAsPlay,
-				articleId,
-				autoplayAllowed,
-				cookieless,
-				inline,
-				isCtp: autoplayAllowed,
-				isDiscovery,
-				isSmartphone,
-				playerParent,
-				...rollOptions
-			};
 
 			playerElement.className = '';
 			playerElement.removeAttribute('style');
 
 			const { blockAutoPlayOnAdError, jwPlayerInstance } = await this.configurePlayer({
 				...playerOptions,
-				rollsObject
+				autoplayAllowed
 			});
 
 			if (jwPlayerInstance) this.jwPlayerInstance = jwPlayerInstance;
@@ -320,7 +308,7 @@ export class JWVideo {
 			window.addEventListener('popstate', (ev) => {
 				if (ev.state) {
 					// this.resetPlayer(playerOptions, rollsObject, autoplayAllowed, ev.state);
-					this.resetPlayer(playerOptions, rollsObject, autoplayAllowed);
+					this.resetPlayer(playerOptions, autoplayAllowed);
 				}
 			});
 
@@ -330,7 +318,7 @@ export class JWVideo {
 				 * and then we try to play an ad again.
 				 */
 				if (blockAutoPlayOnAdError) {
-					this.resetPlayer(playerOptions, rollsObject, false);
+					this.resetPlayer(playerOptions, false);
 				}
 			});
 		} catch (error) {

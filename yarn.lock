@@ -10,13 +10,13 @@
     "@jridgewell/gen-mapping" "^0.3.5"
     "@jridgewell/trace-mapping" "^0.3.24"
 
-"@ekstra-bladet/display-ads@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@ekstra-bladet/display-ads/-/display-ads-0.0.6.tgz#7b67d811f6062aad31d4db3f6799f760dcb0380a"
-  integrity sha512-8y5zABrQzxP3M59DPepmLy9TBMm7MebALXotOiIGbQJqn5OyTioFjij6Sf3NTCuVKjtRBm+vLtuWIgsqQCfh0Q==
+"@ekstra-bladet/display-ads@EkstraBladetUdvikling/display-ads#jwrolls":
+  version "0.0.7"
+  resolved "https://codeload.github.com/EkstraBladetUdvikling/display-ads/tar.gz/047c1d33aed7c140ab8a29aa810f4c524cf853f9"
   dependencies:
     "@ekstra-bladet/eb-cmp" "^3.0.1"
     "@types/googletag" "^3.3.0"
+    "@types/jwplayer" "^8.31.3"
 
 "@ekstra-bladet/eb-cmp@^3.0.1":
   version "3.0.1"

@@ -1,4 +1,5 @@
 import { JWVideo } from './jwplayer';
+import type { IRollsHandlerReturn } from './rolls/rollshandler';
 // import { JWVideoLIVE } from './jwplayer-live';
 import type { IInitJWOptions, IRollOptions } from './types';
 import { videoState } from './videostate.svelte';
@@ -48,13 +49,20 @@ interface IVideoHandlerOptions {
 	disableRolls: IRollOptions['disableRolls'];
 	floatingAllowed: IInitJWOptions['allowFloating'];
 	initObjectJW: IVideoHandlerOptionsFromJW;
+	rollsData: IRollsHandlerReturn | null;
 }
 
 export default class VideoHandler {
 	constructor(videoOptions: IVideoHandlerOptions) {
-		const { autoPlayAllowed = false, disableRolls, floatingAllowed, initObjectJW } = videoOptions;
+		const {
+			autoPlayAllowed = false,
+			// disableRolls,
+			floatingAllowed,
+			initObjectJW,
+			rollsData
+		} = videoOptions;
 
-		const { isLive, libraryDNS, playerId, playerElement, playerParent } = initObjectJW;
+		const { isLive, libraryDNS, playerId, playerParent } = initObjectJW;
 
 		if (playerParent) {
 			videoState.players.push(playerParent);
@@ -82,17 +90,17 @@ export default class VideoHandler {
 		//   vodAllowed: ${video.liveVodAllowed}
 		// };
 
-		const rollOptions = {
-			adscheduleId: '${section.parameters[adscheduleSecParam]}',
-			adschedulePath: 'https://cdn.jwplayer.com/v2/advertising/schedules/',
-			articleTypeName: '${article.articleTypeName}',
-			creativeTimeout: '60000', //  '${ section.parameters[creativeTimeoutParam] }' || '60000',
-			disableRolls,
-			requestTimeout: '60000', // '${ section.parameters[requestTimeoutParam] }' || '60000',
-			sectionPath: '${ video.sectionPath }',
-			type: 'ptv', // '${ section.parameters["video.advertising.type"] }' || 'ptv',
-			videoType: '${ video.context }'
-		};
+		// const rollOptions = {
+		// 	adscheduleId: '${section.parameters[adscheduleSecParam]}',
+		// 	adschedulePath: 'https://cdn.jwplayer.com/v2/advertising/schedules/',
+		// 	articleTypeName: '${article.articleTypeName}',
+		// 	creativeTimeout: '60000', //  '${ section.parameters[creativeTimeoutParam] }' || '60000',
+		// 	disableRolls,
+		// 	requestTimeout: '60000', // '${ section.parameters[requestTimeoutParam] }' || '60000',
+		// 	sectionPath: '${ video.sectionPath }',
+		// 	type: 'ptv', // '${ section.parameters["video.advertising.type"] }' || 'ptv',
+		// 	videoType: '${ video.context }'
+		// };
 
 		const initObject = {
 			autoPlay,
@@ -104,7 +112,7 @@ export default class VideoHandler {
 			// 	articleTitleLength: ${fn:length(titleText)} ? ${fn:length(titleText)} : 0,
 			// 	floatAllowed: floatingAllowed
 			// },
-			rollOptions,
+			rollsData,
 			volume,
 			...initObjectJW
 		};

@@ -1,11 +1,18 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import VideoHandler from '$lib';
 	import { onMount } from 'svelte';
+
+	import VideoHandler from '$lib';
+	import type { IRollsHandlerReturn } from './rolls/rollshandler';
 
 	const { jwMaxResolution, jwLibraryDNS, jwPlayerId } = page.data;
 
-	const { clipId } = $props();
+	interface VideoPlayerProps {
+		advertisingObject: IRollsHandlerReturn | null;
+		clipId: string;
+	}
+
+	const { advertisingObject, clipId }: VideoPlayerProps = $props();
 
 	const {
 		allowFloating = true,
@@ -39,11 +46,12 @@
 				playerParent,
 				title: 'Title'
 			},
-			autoPlayAllowed: true,
+			autoPlayAllowed: false,
 			disableRolls: false,
-			floatingAllowed: true
+			floatingAllowed: true,
+			rollsData: advertisingObject
 		};
-		console.log('video', video);
+		console.log('video', video, advertisingObject);
 		new VideoHandler(video);
 	});
 </script>

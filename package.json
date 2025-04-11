@@ -1,6 +1,5 @@
 {
-	"name": "videoplayer",
-	"private": true,
+	"name": "@EkstraBladetUdvikling/videoplayer",
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
@@ -32,7 +31,7 @@
 		"vite": "^6.2.5"
 	},
 	"dependencies": {
-		"@ekstra-bladet/display-ads": "^0.0.6",
+		"@ekstra-bladet/display-ads": "EkstraBladetUdvikling/display-ads#jwrolls",
 		"@types/jwplayer": "^8.31.3"
 	}
 }
