@@ -2,7 +2,6 @@ import { JWVideo } from './jwplayer';
 import type { IRollsHandlerReturn } from './rolls/rollshandler';
 // import { JWVideoLIVE } from './jwplayer-live';
 import type { IInitJWOptions, IRollOptions } from './types';
-import { videoState } from './videostate.svelte';
 
 const autoPause = (isLive: boolean | undefined) => {
 	if (isLive) {
@@ -34,7 +33,7 @@ type IVideoHandlerOptionsFromJW = Pick<
 	| 'inline'
 	| 'isDiscovery'
 	| 'isLive'
-	// | 'isSmartphone'
+	| 'isSmartphone'
 	| 'libraryDNS'
 	| 'maxResolution'
 	| 'playerElement'
@@ -62,11 +61,7 @@ export default class VideoHandler {
 			rollsData
 		} = videoOptions;
 
-		const { isLive, libraryDNS, playerId, playerParent } = initObjectJW;
-
-		if (playerParent) {
-			videoState.players.push(playerParent);
-		}
+		const { isLive, libraryDNS, playerId } = initObjectJW;
 
 		let autoPlay = false;
 		if (autoPlayAllowed) {
@@ -74,12 +69,6 @@ export default class VideoHandler {
 		}
 
 		const volume = 100;
-
-		let allowFloating = false;
-		if (floatingAllowed && !videoState.floatingUsed) {
-			videoState.floatingUsed = true;
-			allowFloating = true;
-		}
 
 		// const liveOptions = {
 		//   channelId: '${ video.liveChannelId }',
@@ -104,10 +93,10 @@ export default class VideoHandler {
 
 		const initObject = {
 			autoPlay,
-			allowFloating,
+			allowFloating: floatingAllowed,
 			autoPause: autoPause(isLive),
 			cookieless: true,
-			environment: '${ environment }',
+			environment: 'dev',
 			// floatingOptions: {
 			// 	articleTitleLength: ${fn:length(titleText)} ? ${fn:length(titleText)} : 0,
 			// 	floatAllowed: floatingAllowed

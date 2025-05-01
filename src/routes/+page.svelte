@@ -25,6 +25,8 @@
 			console.log('adv', adv);
 		}
 	});
+
+	const floatingAllowed = true;
 </script>
 
 <h1>Welcome to SvelteKit</h1>
@@ -33,7 +35,7 @@
 {#if browser}
 	{#await rollsHandler(rollsOptions) then advertisingObject}
 		<p>Rolls handler: {advertisingObject}</p>
-		<VideoPlayer {advertisingObject} clipId="iUGkeCuC" />
+		<VideoPlayer {advertisingObject} clipId="iUGkeCuC" {floatingAllowed} />
 	{:catch error}
 		<p>Rolls handler error: {error.message}</p>
 	{/await}

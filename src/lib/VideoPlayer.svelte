@@ -10,9 +10,10 @@
 	interface VideoPlayerProps {
 		advertisingObject: IRollsHandlerReturn | null;
 		clipId: string;
+		floatingAllowed?: boolean;
 	}
 
-	const { advertisingObject, clipId }: VideoPlayerProps = $props();
+	const { advertisingObject, clipId, floatingAllowed = false }: VideoPlayerProps = $props();
 
 	const {
 		allowFloating = true,
@@ -48,7 +49,7 @@
 			},
 			autoPlayAllowed: false,
 			disableRolls: false,
-			floatingAllowed: true,
+			floatingAllowed,
 			rollsData: advertisingObject
 		};
 		console.log('video', video, advertisingObject);

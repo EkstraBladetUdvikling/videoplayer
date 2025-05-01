@@ -35,7 +35,7 @@ export interface IInitJWOptions {
 	clipId: string;
 	cookieless: boolean;
 	duration: string;
-	environment: 'prod' | 'staging' | 'dev';
+	// environment: 'prod' | 'staging' | 'dev';
 	fetchPlaylist: boolean;
 	floatingOptions?: IFloatingInitOptions;
 	imageUrl: string;
