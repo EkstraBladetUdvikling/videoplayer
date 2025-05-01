@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 
-	import VideoHandler from '$lib';
+	import VideoHandler from './videohandler';
 	import type { IRollsHandlerReturn } from './rolls/rollshandler';
 
 	const { jwMaxResolution, jwLibraryDNS, jwPlayerId } = page.data;

@@ -96,7 +96,6 @@ export default class VideoHandler {
 			allowFloating: floatingAllowed,
 			autoPause: autoPause(isLive),
 			cookieless: true,
-			environment: 'dev',
 			// floatingOptions: {
 			// 	articleTitleLength: ${fn:length(titleText)} ? ${fn:length(titleText)} : 0,
 			// 	floatAllowed: floatingAllowed
