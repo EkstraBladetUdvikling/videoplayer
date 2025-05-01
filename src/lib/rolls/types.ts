@@ -9,6 +9,7 @@ export type TAdScheduleOptions = Pick<TRollsHandler, 'adscheduleId' | 'adschedul
 export type TRollsHandler = {
 	adscheduleId: string;
 	adschedulePath: string;
+	adUnitName: string;
 	anonId: string;
 	autoplayAllowed: boolean;
 	creativeTimeout: number;

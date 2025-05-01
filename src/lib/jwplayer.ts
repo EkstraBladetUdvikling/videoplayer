@@ -73,7 +73,6 @@ export class JWVideo {
 			libraryDNS,
 			maxResolution,
 			playerElementId,
-			playerParent,
 			recommendationId,
 			title,
 			clipId,
@@ -245,7 +244,8 @@ export class JWVideo {
 			autoplayAllowed = false;
 		});
 
-		liveWrapped(jwOptions.advertising, jwPlayerInstance, playerElementId, rollsData?.urlFragments);
+		if (rollsData)
+			liveWrapped(rollsData.adUnitName, jwPlayerInstance, playerElementId, rollsData.urlFragments);
 
 		return { blockAutoPlayOnAdError, jwPlayerInstance };
 	};

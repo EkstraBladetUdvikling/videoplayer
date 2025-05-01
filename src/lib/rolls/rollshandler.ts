@@ -4,6 +4,7 @@ import { createSchedule } from './createrollurl';
 import type { IUrlFragments, TRollsHandler } from './types';
 
 export interface IRollsHandlerReturn {
+	adUnitName: TRollsHandler['adUnitName'];
 	advertisingObject: Partial<jwplayer.AdvertisingConfig>;
 	urlFragments: IUrlFragments;
 }
@@ -12,8 +13,15 @@ export async function rollsHandler(
 	rollsHandlerObject: TRollsHandler
 ): Promise<IRollsHandlerReturn | null> {
 	try {
-		const { adscheduleId, adschedulePath, anonId, creativeTimeout, custParams, requestTimeout } =
-			rollsHandlerObject;
+		const {
+			adscheduleId,
+			adschedulePath,
+			adUnitName,
+			anonId,
+			creativeTimeout,
+			custParams,
+			requestTimeout
+		} = rollsHandlerObject;
 
 		const adscheduleFromJW = await getAdschedule({ adscheduleId, adschedulePath });
 
@@ -41,6 +49,7 @@ export async function rollsHandler(
 		console.log('equal?', JSON.stringify(advertisingObject) === JSON.stringify(scheduleObject));
 
 		return {
+			adUnitName,
 			advertisingObject,
 			urlFragments: { custParams, keyValues, url: String(adscheduleFromJW?.schedule) }
 		};

@@ -1,28 +1,19 @@
 import { getPrebidTag } from './prebidtag';
-import type { IUrlFragments } from './types';
+import type { IUrlFragments, TRollsHandler } from './types';
 
 export function liveWrapped(
-	advertisingObject: Partial<jwplayer.AdvertisingConfig> | undefined,
+	adUnitName: TRollsHandler['adUnitName'],
 	jwPlayerInstance: jwplayer.JWPlayer,
 	playerElementId: string,
-	urlFragments: IUrlFragments | undefined
+	urlFragments: IUrlFragments
 ) {
-	if (advertisingObject && advertisingObject.schedule) {
+	console.log('liveWrapped', adUnitName, jwPlayerInstance, playerElementId, urlFragments);
+	if (adUnitName) {
 		// Callback which performs header bidding.
-		console.log(
-			'liveWrapped',
-			advertisingObject.schedule,
-			jwPlayerInstance,
-			playerElementId,
-			urlFragments
-		);
+		console.log('liveWrapped', adUnitName, jwPlayerInstance, playerElementId, urlFragments);
 		jwPlayerInstance.setPlaylistItemCallback(async (item) => {
-			const tag = await getPrebidTag(
-				advertisingObject.schedule as string,
-				playerElementId,
-				urlFragments
-			);
-
+			const tag = await getPrebidTag(adUnitName, playerElementId, urlFragments);
+			console.log('tag', tag);
 			return Object.assign({}, item, {
 				adschedule: [
 					{

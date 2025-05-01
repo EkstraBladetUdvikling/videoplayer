@@ -1,5 +1,5 @@
 import { createRollUrl } from './createrollurl';
-import type { IUrlFragments } from './types';
+import type { IUrlFragments, TRollsHandler } from './types';
 
 const performAsyncBidding = async (adUnitName: string, tagId: string) => {
 	return new Promise((resolve) => {
@@ -35,16 +35,10 @@ const performAsyncBidding = async (adUnitName: string, tagId: string) => {
 const FAILSAFE_TIMEOUT = 3000;
 
 export async function getPrebidTag(
-	tag: string,
+	adUnitName: TRollsHandler['adUnitName'],
 	playerElementId: string,
 	urlFragments: IUrlFragments
 ) {
-	const extractedAdUnitName = tag.match(/iu=\/\d+\/ekstra_bladet\/(.*?)\/(.*?)&/);
-	const adUnitName =
-		extractedAdUnitName && extractedAdUnitName[2]
-			? extractedAdUnitName[2].replace('eb_', 'ekstra_bladet_')
-			: '';
-
 	// Resolve when Livewrapped handles queue, otherwise timeout.
 	const pbjsLoaded = new Promise((resolve, reject) => {
 		window.lwhb.cmd.push(resolve);

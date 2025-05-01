@@ -1,9 +1,12 @@
 <script lang="ts">
+	import AdInit from '@ekstra-bladet/display-ads/src/lib/AdInit.svelte';
+
 	import { browser } from '$app/environment';
 	import { afterNavigate } from '$app/navigation';
 	import { rollsHandler } from '$lib/rolls/rollshandler';
 
 	import VideoPlayer from '$lib/VideoPlayer.svelte';
+	import { setContext } from 'svelte';
 
 	// Desktop: F5LFDuhS
 	// Mobil: KKxlzvl5
@@ -26,8 +29,14 @@
 		}
 	});
 
+	setContext('consent', () => {
+		return true;
+	});
+
 	const floatingAllowed = true;
 </script>
+
+<AdInit />
 
 <h1>Welcome to SvelteKit</h1>
 <p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
@@ -36,7 +45,7 @@
 {#if browser}
 	{#await rollsHandler(rollsOptions) then advertisingObject}
 		<p>Rolls handler: {advertisingObject}</p>
-		<VideoPlayer advertisingObject={null} clipId="iUGkeCuC" {floatingAllowed} />
+		<VideoPlayer {advertisingObject} clipId="iUGkeCuC" {floatingAllowed} />
 	{:catch error}
 		<p>Rolls handler error: {error.message}</p>
 	{/await}
