@@ -63,14 +63,13 @@ export class JWVideo {
 		const {
 			// actAsPlay,
 			// articleId,
+			allowFloating,
 			autoPause = true,
 			cookieless,
 			disableRolls,
 			// environment,
 			// fetchPlaylist,
-			floatingOptions = { articleTitleLength: 0, floatAllowed: false },
 			imageUrl,
-
 			libraryDNS,
 			maxResolution,
 			playerElementId,
@@ -97,8 +96,7 @@ export class JWVideo {
 
 		const jwPlayerInstance = window.jwplayer(playerElementId);
 
-		const { articleTitleLength, floatAllowed } = floatingOptions;
-		const floating = getFloatingPlayer(floatAllowed);
+		const floating = getFloatingPlayer(allowFloating);
 
 		const maxRes = `max_resolution=${maxResolution ? maxResolution : '960'}`;
 
@@ -154,12 +152,6 @@ export class JWVideo {
 		}
 		// END Autoplay
 
-		// jwOptions.advertising = advertisingOptions ?? {};
-		console.log('Advertising options', vpaValue);
-		console.log('rollsData', rollsData, disableRolls);
-		console.log('rollsData', window.jwplayer, window.jwplayer?.defaults.advertising);
-
-		console.log('disableRolls', disableRolls, rollsData);
 		if (!disableRolls) {
 			const defaultAdvertising = window.jwplayer?.defaults.advertising ?? {};
 			jwOptions.advertising = rollsData
@@ -169,7 +161,6 @@ export class JWVideo {
 					}
 				: defaultAdvertising;
 		}
-		console.log('jwOptions', jwOptions.advertising);
 
 		// if (!rollsObject.disableRolls) {
 		// 	console.log('Rolls object', vpaValue);
@@ -238,6 +229,7 @@ export class JWVideo {
 		// 	});
 		// }
 
+		/** Ekstra Bladet floating player
 		if (floating) {
 			new FloatingPlayer({
 				articleTitleLength,
@@ -247,6 +239,7 @@ export class JWVideo {
 				playerParent
 			});
 		}
+    */
 
 		jwPlayerInstance.on('autostartNotAllowed', () => {
 			autoplayAllowed = false;
