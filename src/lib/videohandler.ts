@@ -45,7 +45,6 @@ type IVideoHandlerOptionsFromJW = Pick<
 
 interface IVideoHandlerOptions {
 	autoPlayAllowed: IInitJWOptions['autoPlay'];
-	disableRolls: IRollOptions['disableRolls'];
 	floatingAllowed: IInitJWOptions['allowFloating'];
 	initObjectJW: IVideoHandlerOptionsFromJW;
 	rollsData: IRollsHandlerReturn | null;
@@ -53,13 +52,7 @@ interface IVideoHandlerOptions {
 
 export default class VideoHandler {
 	constructor(videoOptions: IVideoHandlerOptions) {
-		const {
-			autoPlayAllowed = false,
-			// disableRolls,
-			floatingAllowed,
-			initObjectJW,
-			rollsData
-		} = videoOptions;
+		const { autoPlayAllowed = false, floatingAllowed, initObjectJW, rollsData } = videoOptions;
 
 		const { isLive, libraryDNS, playerId } = initObjectJW;
 

@@ -34,6 +34,7 @@ export interface IInitJWOptions {
 	autoPlay: boolean;
 	clipId: string;
 	cookieless: boolean;
+	disableRolls: boolean;
 	duration: string;
 	// environment: 'prod' | 'staging' | 'dev';
 	fetchPlaylist: boolean;

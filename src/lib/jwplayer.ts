@@ -65,6 +65,7 @@ export class JWVideo {
 			// articleId,
 			autoPause = true,
 			cookieless,
+			disableRolls,
 			// environment,
 			// fetchPlaylist,
 			floatingOptions = { articleTitleLength: 0, floatAllowed: false },
@@ -155,17 +156,19 @@ export class JWVideo {
 
 		// jwOptions.advertising = advertisingOptions ?? {};
 		console.log('Advertising options', vpaValue);
-		console.log('rollsData', rollsData);
+		console.log('rollsData', rollsData, disableRolls);
 		console.log('rollsData', window.jwplayer, window.jwplayer?.defaults.advertising);
 
-		const defaultAdvertising = window.jwplayer?.defaults.advertising ?? {};
-		jwOptions.advertising = rollsData
-			? {
-					...defaultAdvertising,
-					...rollsData.advertisingObject
-				}
-			: defaultAdvertising;
-
+		console.log('disableRolls', disableRolls, rollsData);
+		if (!disableRolls) {
+			const defaultAdvertising = window.jwplayer?.defaults.advertising ?? {};
+			jwOptions.advertising = rollsData
+				? {
+						...defaultAdvertising,
+						...rollsData.advertisingObject
+					}
+				: defaultAdvertising;
+		}
 		console.log('jwOptions', jwOptions.advertising);
 
 		// if (!rollsObject.disableRolls) {

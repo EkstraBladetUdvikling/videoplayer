@@ -15,12 +15,6 @@
 
 	const { advertisingObject, clipId, floatingAllowed = false }: VideoPlayerProps = $props();
 
-	const {
-		allowFloating = true,
-		caption = 'beskrivelse af video',
-		title = 'Title'
-	} = { allowFloating: true, caption: 'beskrivelse af video', title: 'Title' };
-
 	const device: string = 'desktop';
 
 	let playerParent: HTMLDivElement;
@@ -33,6 +27,7 @@
 				articleId: '',
 				// autoPause: true,
 				clipId,
+				disableRolls: !advertisingObject,
 				duration: '200',
 				fetchPlaylist: false,
 				imageUrl: 'string',
@@ -45,10 +40,10 @@
 				playerElementId,
 				playerId: jwPlayerId,
 				playerParent,
-				title: 'Title'
+				title: 'Title',
+				isSmartphone: device === 'smartphone'
 			},
 			autoPlayAllowed: false,
-			disableRolls: false,
 			floatingAllowed,
 			rollsData: advertisingObject
 		};
@@ -60,19 +55,9 @@
 <div bind:this={playerParent} id="videoPlayerParent" class="video-container {device.toLowerCase()}">
 	<div bind:this={playerElement} id={playerElementId} class="video-container"></div>
 
-	{#if allowFloating && device !== 'smartphone'}
-		<div class="jw-floating-container">
-			<h1 class="jw-floating-title margin-l fontsize-xxlarge">{title}</h1>
-		</div>
-	{/if}
 	<!-- {#if liveChannelId && imageUrl}
 		<div id="placeholderImage_{playerId}" class="image-container--landscape">
 			<img alt="" loading="lazy" src={imageUrl} class="width-1of1 image-container-img" />
 		</div>
 	{/if} -->
 </div>
-{#if caption}
-	<div class="figure-caption grid-column fs-caption padding-xl--rl padding-m--tb">
-		{caption}
-	</div>
-{/if}

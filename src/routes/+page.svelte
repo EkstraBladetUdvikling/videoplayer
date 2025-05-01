@@ -35,7 +35,7 @@
 {#if browser}
 	{#await rollsHandler(rollsOptions) then advertisingObject}
 		<p>Rolls handler: {advertisingObject}</p>
-		<VideoPlayer {advertisingObject} clipId="iUGkeCuC" {floatingAllowed} />
+		<VideoPlayer advertisingObject={null} clipId="iUGkeCuC" {floatingAllowed} />
 	{:catch error}
 		<p>Rolls handler error: {error.message}</p>
 	{/await}
