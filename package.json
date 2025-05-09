@@ -31,7 +31,7 @@
 		"vite": "^6.2.5"
 	},
 	"dependencies": {
-		"@ekstra-bladet/display-ads": "EkstraBladetUdvikling/display-ads#jwrolls",
+		"@ekstra-bladet/display-ads": "0.0.9",
 		"@types/jwplayer": "^8.31.3"
 	}
 }
