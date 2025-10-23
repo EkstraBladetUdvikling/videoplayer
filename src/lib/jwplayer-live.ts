@@ -1,6 +1,5 @@
 import { blockUntilLoaded } from './blockuntilloaded';
-// import { getLiveEvents } from 'frontend/svelte-sharedstore/video/queries';
-// import { rollsHandler } from './advertisement/rollshandler';
+
 import { getFloatingPlayer } from './followplayer';
 
 // import type { TRollsHandler } from './advertisement/types';
@@ -88,12 +87,7 @@ export class JWVideoLIVE {
 	 * to start playing it.
 	 */
 	private checkChannelStatus() {
-		const {
-			channelId,
-			// propertyId,
-			playerElementId,
-			vodAllowed
-		} = this.options;
+		const { channelId, propertyId, playerElementId, vodAllowed } = this.options;
 
 		if (!this.intervalId) {
 			// Make sure to execute this method every UPDATE_FREQUENCY milliseconds.
@@ -102,6 +96,7 @@ export class JWVideoLIVE {
 		this.getChannelStatus(channelId).then(
 			(channelStatus) => {
 				let showPlaceholder = false;
+
 				/* Have to find the player everytime incase the signal have been cutted then JW drawing new player */
 				const videoPlayer = document.getElementById(playerElementId) as HTMLDivElement;
 				this.playerParent.style.display = 'block';
@@ -133,55 +128,56 @@ export class JWVideoLIVE {
 							message: `Failed to start live event stream playback: ${(error as Error).message}`
 						});
 					});
-				} else if (!this.isPlayingClip && vodAllowed) {
-					console.log('Playing VOD as fallback for live stream');
-					// getLiveEvents({
-					// 	channelId,
-					// 	pageNo: 1,
-					// 	pageSize: 100,
-					// 	siteId: propertyId
-					// }).then((responseData: any) => {
-					// 	if (responseData.length) {
-					// 		const completeEvent = responseData.find(
-					// 			(recentVideoEvent) => recentVideoEvent.status === 'completed'
-					// 		);
+				} else if (
+					!this.isPlayingClip &&
+					vodAllowed &&
+					typeof this.options.vodFunction === 'function'
+				) {
+					console.log('Playing VOD as fallback for live stream', this.options.vodFunction);
 
-					// 		if (completeEvent) {
-					// 			this.isPlayingClip = true;
+					this.options.vodFunction(channelId).then((responseData) => {
+						console.log('JWPLIVE getSiteChannelsEvents responseData', responseData);
+						if (responseData.length) {
+							const completeEvent = responseData.find(
+								(recentVideoEvent) => recentVideoEvent.status === 'completed'
+							);
 
-					// 			const { media_id: eventId } = completeEvent;
-					// 			// Check if we have seen this eventId before.
-					// 			if (this.currentEventId === eventId) {
-					// 				// The eventId returned by the API was not a *new* event id.
-					// 				// Ignore it and continue polling until we see a new id.
-					// 				return;
-					// 			}
-					// 			this.currentEventId = eventId as string;
+							if (completeEvent) {
+								this.isPlayingClip = true;
 
-					// 			// Attempt to configure the player in order to start livestream playback.
-					// 			this.configurePlayer(eventId as string, true).catch((error) => {
-					// 				this.isPlayingClip = false;
-					// 				console.error({
-					// 					component: 'EBJWLIVE',
-					// 					label: 'checkChannelStatus',
-					// 					level: 'ERROR',
-					// 					message: `Failed to start clip playback: ${(error as Error).message}`
-					// 				});
-					// 			});
-					// 		} else if (this.placeholderImage) {
-					// 			showPlaceholder = true;
-					// 		}
-					// 	} else if (this.placeholderImage) {
-					// 		showPlaceholder = true;
-					// 	}
-					// });
+								const { media_id: eventId } = completeEvent;
+								// Check if we have seen this eventId before.
+								if (this.currentEventId === eventId) {
+									// The eventId returned by the API was not a *new* event id.
+									// Ignore it and continue polling until we see a new id.
+									return;
+								}
+								this.currentEventId = eventId as string;
+
+								// Attempt to configure the player in order to start livestream playback.
+								this.configurePlayer(eventId as string, true).catch((error) => {
+									this.isPlayingClip = false;
+									console.error({
+										component: 'EBJWLIVE',
+										label: 'checkChannelStatus',
+										level: 'ERROR',
+										message: `Failed to start clip playback: ${(error as Error).message}`
+									});
+								});
+							} else if (this.placeholderImage) {
+								showPlaceholder = true;
+							}
+						} else if (this.placeholderImage) {
+							showPlaceholder = true;
+						}
+					});
 				} else if (
 					channelStatus.status === 'idle' &&
 					!this.placeholderImage &&
 					this.options.isDrEdition
 				) {
 					this.playerParent.style.display = 'none';
-				} else if (this.placeholderImage) {
+				} else if (this.placeholderImage && this.isPlayingClip === false) {
 					showPlaceholder = true;
 				}
 
@@ -189,8 +185,7 @@ export class JWVideoLIVE {
 					'JWPLIVE showPlaceholder',
 					channelStatus.status,
 					'showPlaceholder',
-					showPlaceholder,
-					this.placeholderImage
+					showPlaceholder
 				);
 
 				if (showPlaceholder) {

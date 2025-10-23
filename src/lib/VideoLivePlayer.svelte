@@ -13,6 +13,7 @@
 		floatingAllowed?: boolean;
 		imageUrl?: string;
 		vodAllowed?: boolean;
+		vodFunction?: (channelId: string) => Promise<any[]>;
 	}
 
 	const {
@@ -20,7 +21,8 @@
 		channelId,
 		floatingAllowed = false,
 		imageUrl,
-		vodAllowed = true
+		vodAllowed = true,
+		vodFunction
 	}: VideoLivePlayerProps = $props();
 
 	const device: string = 'desktop';
@@ -51,7 +53,8 @@
 				channelId,
 				placeholderImageId,
 				placeholderImageUrl,
-				vodAllowed
+				vodAllowed,
+				vodFunction
 			},
 			autoPlayAllowed: true,
 			floatingAllowed,

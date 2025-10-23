@@ -5,6 +5,7 @@ export interface IJWLive {
 	placeholderImageId: string;
 	placeholderImageUrl: string;
 	vodAllowed: boolean;
+	vodFunction?: (channelId: string) => Promise<any[]>;
 }
 
 export interface IRollOptions {
@@ -47,6 +48,7 @@ export interface IInitJWOptions {
 	playerElement: HTMLDivElement;
 	playerElementId: string;
 	playerParent: HTMLDivElement;
+
 	recommendationId?: string;
 	title: string;
 	volume: number;

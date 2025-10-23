@@ -112,7 +112,8 @@ export default class VideoLiveHandler {
 			channelId,
 			placeholderImageId,
 			placeholderImageUrl,
-			vodAllowed
+			vodAllowed,
+			vodFunction
 		} = initObjectJW;
 
 		console.log('vodAllowed', vodAllowed);
@@ -130,7 +131,8 @@ export default class VideoLiveHandler {
 			channelId,
 			placeholderImageId,
 			placeholderImageUrl,
-			vodAllowed
+			vodAllowed,
+			vodFunction
 		};
 
 		new JWVideoLIVE(liveInitObject);
