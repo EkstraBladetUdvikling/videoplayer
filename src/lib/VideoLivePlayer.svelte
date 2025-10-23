@@ -8,7 +8,7 @@
 	const { jwMaxResolution, jwLibraryDNS, jwPlayerId } = page.data;
 
 	interface VideoLivePlayerProps {
-		advertisingObject?: IRollsHandlerReturn | undefined;
+		advertisingObject?: IRollsHandlerReturn | undefined | null;
 		channelId: string;
 		floatingAllowed?: boolean;
 		imageUrl?: string;
@@ -32,9 +32,7 @@
 	const playerElementId = `jwVideo_${channelId}`;
 	const placeholderImageId = `placeholderImage_${playerElementId}`;
 
-	const placeholderImageUrl =
-		imageUrl ??
-		'https://img-cdn-p.ekstrabladet.dk/p-image/CE7lGN_O_oGUEoCHVy8Ka0GnU1whc2tvR4btehwUMRg/AAADM-kfFgA/ekstrabladet/10980641/relationBig_910/';
+	const placeholderImageUrl = imageUrl ?? '';
 
 	onMount(() => {
 		const video = {
