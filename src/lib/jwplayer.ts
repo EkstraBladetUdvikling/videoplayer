@@ -6,7 +6,7 @@ import type { IInitJWOptions, ISetupJWOptions } from './types';
 
 // import { isTest } from 'frontend/shared/util/environment';
 
-import { FloatingPlayer, getFloatingPlayer } from './followplayer';
+import { getFloatingPlayer } from './followplayer';
 import { liveWrapped } from './rolls/livewrapped';
 
 export class JWVideo {
@@ -93,7 +93,7 @@ export class JWVideo {
 			return { blockAutoPlayOnAdError: false, jwPlayerInstance: null };
 		}
 
-		const jwPlayerInstance = window.jwplayer(playerElementId);
+		const jwPlayerInstance = window.jwplayer(playerElementId) as jwplayer.JWPlayer;
 
 		const floating = getFloatingPlayer(allowFloating);
 
@@ -227,18 +227,6 @@ export class JWVideo {
 		// 		});
 		// 	});
 		// }
-
-		/** Ekstra Bladet floating player
-		if (floating) {
-			new FloatingPlayer({
-				articleTitleLength,
-				floatAllowed,
-				jwPlayerInstance,
-				playerElementId,
-				playerParent
-			});
-		}
-    */
 
 		jwPlayerInstance.on('autostartNotAllowed', () => {
 			autoplayAllowed = false;

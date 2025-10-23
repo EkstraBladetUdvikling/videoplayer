@@ -7,6 +7,8 @@
 
 	import VideoPlayer from '$lib/VideoPlayer.svelte';
 	import { setContext } from 'svelte';
+	import VideoLivePlayer from '$lib/VideoLivePlayer.svelte';
+	import { getSiteChannelsEvents } from '$lib/fetchEvents';
 
 	// Desktop: F5LFDuhS
 	// Mobil: KKxlzvl5
@@ -40,14 +42,19 @@
 
 <h1>Welcome to SvelteKit</h1>
 <p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
-<div style="height: 1200px; background: purple;"></div>
-
-{#if browser}
+<!-- <div style="height: 1200px; background: purple;"></div> -->
+<!-- <div style="min-height: 30px; background: lightgray;">
+	<VideoLivePlayer channelId="2JEV4cpt" {floatingAllowed} />
+</div> -->
+<div style="min-height: 30px; background: rosa;">
+	<VideoLivePlayer channelId="rOcitXGI" {floatingAllowed} vodFunction={getSiteChannelsEvents} />
+</div>
+<!-- {#if browser}
 	{#await rollsHandler(rollsOptions) then advertisingObject}
 		<p>Rolls handler: {advertisingObject}</p>
 		<VideoPlayer {advertisingObject} clipId="iUGkeCuC" {floatingAllowed} />
 	{:catch error}
 		<p>Rolls handler error: {error.message}</p>
 	{/await}
-{/if}
-<div style="height: 1200px; background: pink;"></div>
+{/if} -->
+<!-- <div style="height: 1200px; background: pink;"></div> -->

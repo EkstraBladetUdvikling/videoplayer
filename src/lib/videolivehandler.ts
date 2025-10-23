@@ -1,14 +1,6 @@
-import { JWVideo } from './jwplayer';
 import type { IRollsHandlerReturn } from './rolls/rollshandler';
-// import { JWVideoLIVE } from './jwplayer-live';
+import { JWVideoLIVE, type ILiveInitOptions } from './jwplayer-live';
 import type { IInitJWOptions } from './types';
-
-const autoPause = (isLive: boolean | undefined) => {
-	if (isLive) {
-		return false;
-	}
-	return true;
-};
 
 function addJWPlayer(libraryDNS: string, playerId: string) {
 	const script = document.createElement('script');
@@ -23,46 +15,38 @@ function addJWPlayer(libraryDNS: string, playerId: string) {
 	document.head.appendChild(script);
 }
 
-type IVideoHandlerOptionsFromJW = Pick<
-	IInitJWOptions,
-	| 'articleId'
-	| 'clipId'
-	| 'disableRolls'
-	| 'duration'
-	| 'fetchPlaylist'
-	| 'imageUrl'
-	| 'inline'
-	| 'isDiscovery'
-	| 'isLive'
-	| 'isSmartphone'
-	| 'libraryDNS'
-	| 'maxResolution'
-	| 'playerElement'
-	| 'playerElementId'
-	| 'playerId'
-	| 'playerParent'
-	| 'title'
->;
+type ILiveVideoHandlerOptionsFromJW = Omit<
+	ILiveInitOptions,
+	'autoPlay' | 'allowFloating' | 'cookieless'
+> &
+	Pick<IInitJWOptions, 'playerId'>;
 
 interface IVideoHandlerOptions {
 	autoPlayAllowed: IInitJWOptions['autoPlay'];
 	floatingAllowed: IInitJWOptions['allowFloating'];
-	initObjectJW: IVideoHandlerOptionsFromJW;
-	rollsData: IRollsHandlerReturn | null;
+	initObjectJW: ILiveVideoHandlerOptionsFromJW;
+	rollsData: IRollsHandlerReturn | undefined | null;
 }
 
-export default class VideoHandler {
+export default class VideoLiveHandler {
 	constructor(videoOptions: IVideoHandlerOptions) {
-		const { autoPlayAllowed = false, floatingAllowed, initObjectJW, rollsData } = videoOptions;
+		const { autoPlayAllowed = true, floatingAllowed, initObjectJW, rollsData } = videoOptions;
 
-		const { isLive, libraryDNS, playerId } = initObjectJW;
+		const { libraryDNS, playerId } = initObjectJW;
 
 		let autoPlay = false;
 		if (autoPlayAllowed) {
 			autoPlay = true;
 		}
 
-		const volume = 100;
+		// const liveOptions = {
+		//   channelId: '${ video.liveChannelId }',
+		//   libraryDNS: '${libraryDNS}',
+		//   placeholderImageId: 'placeholderImage_${video.playerId}',
+		//   placeholderImageUrl: '${imageUrl}',
+		//   propertyId: '${ propertyId }',
+		//   vodAllowed: ${video.liveVodAllowed}
+		// };
 
 		// const rollOptions = {
 		// 	adscheduleId: '${section.parameters[adscheduleSecParam]}',
@@ -75,22 +59,6 @@ export default class VideoHandler {
 		// 	type: 'ptv', // '${ section.parameters["video.advertising.type"] }' || 'ptv',
 		// 	videoType: '${ video.context }'
 		// };
-
-		const initObject = {
-			autoPlay,
-			allowFloating: floatingAllowed,
-			autoPause: autoPause(isLive),
-			cookieless: true,
-			// floatingOptions: {
-			// 	articleTitleLength: ${fn:length(titleText)} ? ${fn:length(titleText)} : 0,
-			// 	floatAllowed: floatingAllowed
-			// },
-			rollsData,
-			volume,
-			...initObjectJW
-		};
-
-		console.log('initObject', initObject);
 
 		// 	const isPreview = window.location.search.indexOf('token') !== -1;
 		// 	if (isPreview) {
@@ -136,7 +104,37 @@ export default class VideoHandler {
 		// 	}
 
 		addJWPlayer(libraryDNS, playerId);
+		const {
+			disableRolls,
+			isDrEdition,
+			playerElementId,
+			playerParent,
+			channelId,
+			placeholderImageId,
+			placeholderImageUrl,
+			vodAllowed,
+			vodFunction
+		} = initObjectJW;
 
-		new JWVideo(initObject);
+		console.log('vodAllowed', vodAllowed);
+
+		const liveInitObject = {
+			autoPlay,
+			allowFloating: floatingAllowed,
+			autoPause: false,
+			cookieless: true,
+			disableRolls,
+			isDrEdition,
+			libraryDNS,
+			playerElementId,
+			playerParent,
+			channelId,
+			placeholderImageId,
+			placeholderImageUrl,
+			vodAllowed,
+			vodFunction
+		};
+
+		new JWVideoLIVE(liveInitObject);
 	}
 }

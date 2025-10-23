@@ -1,12 +1,11 @@
 import type { IRollsHandlerReturn } from './rolls/rollshandler';
 
-export interface IEBjwLive {
+export interface IJWLive {
 	channelId: string;
-	libraryDNS: string;
 	placeholderImageId: string;
 	placeholderImageUrl: string;
-	propertyId: string;
 	vodAllowed: boolean;
+	vodFunction?: (channelId: string) => Promise<any[]>;
 }
 
 export interface IRollOptions {
@@ -45,11 +44,11 @@ export interface IInitJWOptions {
 	isDrEdition?: boolean;
 	isLive: boolean;
 	isSmartphone: boolean;
-	liveOptions?: IEBjwLive;
 	maxResolution: string;
 	playerElement: HTMLDivElement;
 	playerElementId: string;
 	playerParent: HTMLDivElement;
+
 	recommendationId?: string;
 	title: string;
 	volume: number;
