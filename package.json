@@ -33,5 +33,8 @@
 	"dependencies": {
 		"@ekstra-bladet/display-ads": "0.0.9",
 		"@types/jwplayer": "^8.31.3"
+	},
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com"
 	}
 }
