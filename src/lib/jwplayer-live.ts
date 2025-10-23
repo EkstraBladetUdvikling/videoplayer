@@ -1,11 +1,24 @@
 import { blockUntilLoaded } from './blockuntilloaded';
-import { getLiveEvents } from 'frontend/svelte-sharedstore/video/queries';
-import { rollsHandler } from './advertisement/rollshandler';
-import { FloatingPlayer, getFloatingPlayer } from './followplayer';
+// import { getLiveEvents } from 'frontend/svelte-sharedstore/video/queries';
+// import { rollsHandler } from './advertisement/rollshandler';
+import { getFloatingPlayer } from './followplayer';
 
-import type { IJWPlayerInstance } from '../types';
-import type { TRollsHandler } from './advertisement/types';
-import type { IEBjwLive, IInitJWOptions, IJWPlayerConfig } from './types';
+// import type { TRollsHandler } from './advertisement/types';
+import type { IInitJWOptions, IJWLive } from './types';
+
+export type ILiveInitOptions = IJWLive &
+	Pick<
+		IInitJWOptions,
+		| 'allowFloating'
+		| 'autoPlay'
+		| 'autoPause'
+		| 'cookieless'
+		| 'disableRolls'
+		| 'isDrEdition'
+		| 'libraryDNS'
+		| 'playerElementId'
+		| 'playerParent'
+	>;
 
 export class JWVideoLIVE {
 	private autoplayAllowed: boolean = true;
@@ -13,57 +26,56 @@ export class JWVideoLIVE {
 	private disableRolls!: boolean;
 	private hasBeenSetup = false;
 	private HLS_BUFFER_STALL_WARNING = 334001;
-	private intervalId: any;
+	private intervalId: ReturnType<typeof setInterval> | void = undefined;
 	private isPlayingClip = false;
-	private liveOptions!: IEBjwLive;
+
 	private LIVESTREAM_COMPLETE_ERROR = 230001;
 	private MAX_RETRIES = 3;
-	private options!: IInitJWOptions;
+	private options!: ILiveInitOptions;
 	private placeholderImage!: HTMLImageElement;
-	private playerInstance: IJWPlayerInstance | null = null;
+
+	private jwPlayerInstance: jwplayer.JWPlayer | null = null;
+
 	private playerParent!: HTMLElement;
 	private UPDATE_FREQUENCY = 10 * 1e3;
 
-	private VOD_CONFIG: Partial<IJWPlayerConfig> = {
+	private VOD_CONFIG: Partial<jwplayer.PlayerConfig> = {
 		repeat: false
 	};
 
-	constructor(optionsArg: IInitJWOptions) {
+	constructor(optionsArg: ILiveInitOptions) {
+		console.log('JWPLIVE optionsArg', optionsArg);
 		this.init(optionsArg);
 	}
 
-	private async init(optionsArg: IInitJWOptions) {
+	private async init(optionsArg: ILiveInitOptions) {
 		await blockUntilLoaded();
 
 		try {
 			this.options = optionsArg;
 
-			this.disableRolls = this.options.rollOptions.disableRolls;
+			this.disableRolls = this.options.disableRolls;
 
-			const { autoPlay, liveOptions } = optionsArg;
-			if (!liveOptions) {
-				throw new Error('Please provide liveOptions');
-			}
-
+			const { autoPlay } = this.options;
 			this.autoplayAllowed = autoPlay;
-			this.liveOptions = liveOptions;
 
-			if (!this.liveOptions?.channelId.match(/[a-zA-Z0-9]{8}/)) {
+			if (!this.options.channelId.match(/[a-zA-Z0-9]{8}/)) {
 				throw new Error('Please modify the channel ID');
 			}
 
-			const { playerElementId, playerParent } = this.options;
-			const { placeholderImageId } = this.liveOptions;
+			const { placeholderImageId, playerElementId, playerParent } = this.options;
 
 			this.placeholderImage = document.getElementById(placeholderImageId) as HTMLImageElement;
+			console.log('JWPLIVE placeholderImage', this.placeholderImage, placeholderImageId);
 			/** The player on the page which we'll use for playback */
-			this.playerInstance = (window as any).jwplayer(playerElementId);
+
+			this.jwPlayerInstance = window.jwplayer(playerElementId) as jwplayer.JWPlayer;
 
 			this.playerParent = playerParent;
 
 			this.checkChannelStatus();
 		} catch (error) {
-			window.ebLog({
+			console.error({
 				component: 'EBJWLIVE',
 				level: 'ERROR',
 				message: (error as Error).message
@@ -76,8 +88,12 @@ export class JWVideoLIVE {
 	 * to start playing it.
 	 */
 	private checkChannelStatus() {
-		const { channelId, propertyId, vodAllowed } = this.liveOptions;
-		const { playerElementId } = this.options;
+		const {
+			channelId,
+			// propertyId,
+			playerElementId,
+			vodAllowed
+		} = this.options;
 
 		if (!this.intervalId) {
 			// Make sure to execute this method every UPDATE_FREQUENCY milliseconds.
@@ -110,7 +126,7 @@ export class JWVideoLIVE {
 
 					// Attempt to configure the player in order to start livestream playback.
 					this.configurePlayer(eventId).catch((error) => {
-						window.ebLog({
+						console.error({
 							component: 'EBJWLIVE',
 							label: 'checkChannelStatus',
 							level: 'ERROR',
@@ -118,46 +134,47 @@ export class JWVideoLIVE {
 						});
 					});
 				} else if (!this.isPlayingClip && vodAllowed) {
-					getLiveEvents({
-						channelId,
-						pageNo: 1,
-						pageSize: 100,
-						siteId: propertyId
-					}).then((responseData) => {
-						if (responseData.length) {
-							const completeEvent = responseData.find(
-								(recentVideoEvent) => recentVideoEvent.status === 'completed'
-							);
+					console.log('Playing VOD as fallback for live stream');
+					// getLiveEvents({
+					// 	channelId,
+					// 	pageNo: 1,
+					// 	pageSize: 100,
+					// 	siteId: propertyId
+					// }).then((responseData: any) => {
+					// 	if (responseData.length) {
+					// 		const completeEvent = responseData.find(
+					// 			(recentVideoEvent) => recentVideoEvent.status === 'completed'
+					// 		);
 
-							if (completeEvent) {
-								this.isPlayingClip = true;
+					// 		if (completeEvent) {
+					// 			this.isPlayingClip = true;
 
-								const { media_id: eventId } = completeEvent;
-								// Check if we have seen this eventId before.
-								if (this.currentEventId === eventId) {
-									// The eventId returned by the API was not a *new* event id.
-									// Ignore it and continue polling until we see a new id.
-									return;
-								}
-								this.currentEventId = eventId as string;
+					// 			const { media_id: eventId } = completeEvent;
+					// 			// Check if we have seen this eventId before.
+					// 			if (this.currentEventId === eventId) {
+					// 				// The eventId returned by the API was not a *new* event id.
+					// 				// Ignore it and continue polling until we see a new id.
+					// 				return;
+					// 			}
+					// 			this.currentEventId = eventId as string;
 
-								// Attempt to configure the player in order to start livestream playback.
-								this.configurePlayer(eventId as string, true).catch((error) => {
-									this.isPlayingClip = false;
-									window.ebLog({
-										component: 'EBJWLIVE',
-										label: 'checkChannelStatus',
-										level: 'ERROR',
-										message: `Failed to start clip playback: ${(error as Error).message}`
-									});
-								});
-							} else if (this.placeholderImage) {
-								showPlaceholder = true;
-							}
-						} else if (this.placeholderImage) {
-							showPlaceholder = true;
-						}
-					});
+					// 			// Attempt to configure the player in order to start livestream playback.
+					// 			this.configurePlayer(eventId as string, true).catch((error) => {
+					// 				this.isPlayingClip = false;
+					// 				console.error({
+					// 					component: 'EBJWLIVE',
+					// 					label: 'checkChannelStatus',
+					// 					level: 'ERROR',
+					// 					message: `Failed to start clip playback: ${(error as Error).message}`
+					// 				});
+					// 			});
+					// 		} else if (this.placeholderImage) {
+					// 			showPlaceholder = true;
+					// 		}
+					// 	} else if (this.placeholderImage) {
+					// 		showPlaceholder = true;
+					// 	}
+					// });
 				} else if (
 					channelStatus.status === 'idle' &&
 					!this.placeholderImage &&
@@ -168,20 +185,28 @@ export class JWVideoLIVE {
 					showPlaceholder = true;
 				}
 
+				console.log(
+					'JWPLIVE showPlaceholder',
+					channelStatus.status,
+					'showPlaceholder',
+					showPlaceholder,
+					this.placeholderImage
+				);
+
 				if (showPlaceholder) {
 					this.placeholderImage.style.display = 'block';
 					videoPlayer.style.display = 'none';
 				}
 			},
 			(error) => {
-				window.ebLog({
+				console.error({
 					component: 'EBJWLIVE',
 					label: 'checkChannelStatus',
 					level: 'ERROR',
 					message: `Unable to fetch the channel status for ${channelId}: ${(error as Error).message}`
 				});
 				// If we fail to retrieve the channel status, then give up.
-				this.intervalId = clearInterval(this.intervalId);
+				if (this.intervalId) this.intervalId = clearInterval(this.intervalId);
 			}
 		);
 	}
@@ -207,7 +232,7 @@ export class JWVideoLIVE {
 	 * @param channelId The channel to fetch the status for.
 	 */
 	private getChannelStatus(channelId: string) {
-		return this.fetchJSON(`//${this.liveOptions.libraryDNS}/live/channels/${channelId}.json`);
+		return this.fetchJSON(`//${this.options.libraryDNS}/live/channels/${channelId}.json`);
 	}
 
 	/**
@@ -216,7 +241,7 @@ export class JWVideoLIVE {
 	 * @param videoId The media id to fetch a single item playlist for.
 	 */
 	private getPlaylist(videoId: string) {
-		return this.fetchJSON(`//${this.liveOptions.libraryDNS}/v2/media/${videoId}`, {
+		return this.fetchJSON(`//${this.options.libraryDNS}/v2/media/${videoId}`, {
 			cache: 'no-cache'
 		});
 	}
@@ -238,7 +263,7 @@ export class JWVideoLIVE {
 				} catch (error) {
 					++attempts;
 
-					window.ebLog({
+					console.error({
 						component: 'EBJWLIVE',
 						label: 'configurePlayer',
 						level: 'ERROR',
@@ -250,7 +275,7 @@ export class JWVideoLIVE {
 						playlist = {
 							playlist: [
 								{
-									file: `//${this.liveOptions.libraryDNS}/live/events/${eventId}.m3u8`,
+									file: `//${this.options.libraryDNS}/live/events/${eventId}.m3u8`,
 									mediaid: eventId
 								}
 							]
@@ -270,14 +295,14 @@ export class JWVideoLIVE {
 
 				this.setupPlayer(this.VOD_CONFIG);
 			} else {
-				this.playerInstance?.load(playlist.playlist);
-				this.playerInstance?.setConfig(repeat);
+				this.jwPlayerInstance?.load(playlist.playlist);
+				this.jwPlayerInstance?.setConfig({ repeat });
 
 				// Start playback
-				this.playerInstance?.play();
+				this.jwPlayerInstance?.play();
 			}
 		} catch (error) {
-			window.ebLog({
+			console.error({
 				component: 'EBJWLIVE',
 				label: 'configurePlayer',
 				level: 'ERROR',
@@ -286,120 +311,126 @@ export class JWVideoLIVE {
 		}
 	}
 
-	private async setupPlayer(setupOptions: Partial<IJWPlayerConfig>) {
+	private async setupPlayer(setupOptions: Partial<jwplayer.PlayerConfig>) {
+		console.log('JWLive setupPlayer', this.hasBeenSetup);
 		if (this.hasBeenSetup) return;
 
 		const {
-			actAsPlay,
-			articleId,
+			allowFloating = false,
+			// actAsPlay,
+			// articleId,
 			autoPause,
 			cookieless,
-			floatingOptions = { articleTitleLength: 0, floatAllowed: false },
-			inline,
-			isDiscovery,
-			isSmartphone,
-			longboatVideoObject,
-			playerElementId,
-			playerParent,
-			rollOptions
+
+			// inline,
+			// isDiscovery,
+
+			// longboatVideoObject,
+
+			playerElementId
+
+			// rollOptions
 		} = this.options;
 
-		const { placeholderImageUrl } = this.liveOptions;
+		const { placeholderImageUrl } = this.options;
 		if (!window.jwplayer) {
 			throw new Error('JW Player is not loaded');
 		}
 
-		this.playerInstance = window.jwplayer(playerElementId);
+		this.jwPlayerInstance = window.jwplayer(playerElementId);
 		this.hasBeenSetup = true;
 
 		if (this.placeholderImage) {
 			this.placeholderImage.style.display = 'none';
 		}
 
-		const { articleTitleLength, floatAllowed } = floatingOptions;
+		// const { disableRolls } = this;
 
-		const floating = getFloatingPlayer(floatAllowed);
+		// const rollsStuff: TRollsHandler = {
+		// 	...rollOptions,
+		// 	actAsPlay,
+		// 	articleId,
+		// 	autoplayAllowed: this.autoplayAllowed,
+		// 	cookieless,
+		// 	disableRolls,
+		// 	inline,
+		// 	isCtp: false,
+		// 	isDiscovery,
+		// 	isSmartphone,
+		// 	playerParent
+		// };
 
-		const { disableRolls } = this;
+		// const advertising = await rollsHandler(rollsStuff);
+		const floating = getFloatingPlayer(allowFloating);
 
-		const rollsStuff: TRollsHandler = {
-			...rollOptions,
-			actAsPlay,
-			articleId,
-			autoplayAllowed: this.autoplayAllowed,
-			cookieless,
-			disableRolls,
-			inline,
-			isCtp: false,
-			isDiscovery,
-			isSmartphone,
-			playerParent
+		const jwOptions: Partial<jwplayer.PlayerConfig> = {
+			...setupOptions,
+			floating,
+			image: placeholderImageUrl
 		};
 
-		const advertising = await rollsHandler(rollsStuff);
+		if (cookieless) {
+			jwOptions.doNotSaveCookies = true;
+		}
 
-		setupOptions.advertising = advertising ? advertising.advertisingObject : {};
+		// jwOptions.advertising = advertising ? advertising.advertisingObject : {};
 
 		/**
 		 * Autopause
 		 */
 		if (!autoPause) {
-			setupOptions.autoPause = {
+			jwOptions.autoPause = {
 				viewability: autoPause
 			};
 		}
 		// END Autoplay
-
+		console.log('this.autoplayAllowed', this.autoplayAllowed);
 		if (this.autoplayAllowed) {
-			setupOptions.autostart = 'viewable';
-			setupOptions.mute = true;
+			jwOptions.autostart = 'viewable';
+			jwOptions.mute = true;
 		} else {
-			setupOptions.autostart = false;
+			jwOptions.autostart = false;
 		}
 
-		this.playerInstance.setup({
-			...setupOptions,
-			floating,
-			image: placeholderImageUrl
-		});
+		this.jwPlayerInstance?.setup(jwOptions);
 
-		if (floating) {
-			new FloatingPlayer({
-				articleTitleLength,
-				floatAllowed,
-				isSmartphone,
-				jwPlayerInstance: this.playerInstance,
-				playerElementId,
-				playerParent
-			});
-		}
+		// if (floating) {
+		// 	new FloatingPlayer({
+		// 		articleTitleLength,
+		// 		floatAllowed,
+		// 		isSmartphone,
+		// 		jwPlayerInstance: this.jwPlayerInstance,
+		// 		playerElementId,
+		// 		playerParent
+		// 	});
+		// }
 
-		this.playerInstance.on('ready', () => {
+		this.jwPlayerInstance?.on('ready', () => {
 			this.updatePoster();
 		});
 
-		this.playerInstance.on('autostartNotAllowed', () => {
+		this.jwPlayerInstance?.on('autostartNotAllowed', () => {
 			this.autoplayAllowed = false;
 			this.updatePoster();
 		});
 
-		this.playerInstance.on('adPlay', () => {
+		this.jwPlayerInstance?.on('adPlay', () => {
 			this.disableRolls = true;
 		});
 
 		// Register an event listener that triggers when the JW Player has finished playing all
 		// elements in its playlist. In this demo, this event is triggered when livestream playback
 		// has finished.
-		this.playerInstance.on('playlistComplete', () => this.handleLivestreamFinished());
+		this.jwPlayerInstance?.on('playlistComplete', () => this.handleLivestreamFinished());
 
 		// Register an event listener that triggers when the player emits an error.
-		this.playerInstance.on('error', (error: any) => {
-			const { vodAllowed } = this.liveOptions;
+		this.jwPlayerInstance?.on('error', (error) => {
+			const { vodAllowed } = this.options;
 			// Check if the error may have been because the livestream stopped updating, in this case
 			// we'll switch back to playing the VOD.
 			if (
-				this.playerInstance &&
-				this.playerInstance.getPlaylistItem().mediaid !== this.currentEventId &&
+				this.jwPlayerInstance &&
+				this.jwPlayerInstance?.getPlaylistItem().mediaid !== this.currentEventId &&
 				vodAllowed
 			) {
 				// Ignore errors during VOD playback.
@@ -413,10 +444,10 @@ export class JWVideoLIVE {
 		// Register an event listener which listens for buffer warnings from the player.
 		// We can use the warnings generated by the player to realize a very fast switchover
 		// between the livestream and the VOD asset.
-		this.playerInstance.on('warning', (warn: any) => {
+		this.jwPlayerInstance?.on('warning', (warn) => {
 			if (
-				this.playerInstance &&
-				this.playerInstance.getPlaylistItem().mediaid !== this.currentEventId
+				this.jwPlayerInstance &&
+				this.jwPlayerInstance?.getPlaylistItem().mediaid !== this.currentEventId
 			) {
 				// Ignore warnings during VOD playback.
 				return;
@@ -433,13 +464,13 @@ export class JWVideoLIVE {
 		 * Longboat tracking
 		 * JW event insceptor: https://www.jwplayer.com/developers/player-event-inspector/
 		 */
-		if (longboatVideoObject) {
-			trackVideo({
-				isLive: true,
-				jwPlayerInstance: this.playerInstance,
-				longboatVideoObject
-			});
-		}
+		// if (longboatVideoObject) {
+		// trackVideo({
+		// 	isLive: true,
+		// 	jwPlayerInstance: this.jwPlayerInstance,
+		// 	longboatVideoObject
+		// });
+		// }
 	}
 
 	private handleLivestreamFinished() {
@@ -456,7 +487,7 @@ export class JWVideoLIVE {
 		// playerInstance.setConfig({repeat: true});
 		// // Reload the VOD playlist.
 		// playerInstance.load(VOD_PLAYLIST);
-		if (this.liveOptions.channelId) {
+		if (this.options.channelId) {
 			// Start checking for a new event.
 			this.checkChannelStatus();
 		}
@@ -473,7 +504,7 @@ export class JWVideoLIVE {
 	}
 
 	private updatePoster() {
-		const { placeholderImageUrl } = this.liveOptions;
+		const { placeholderImageUrl } = this.options;
 		const previewEl = this.playerParent.querySelector('.jw-preview.jw-reset') as HTMLDivElement;
 		previewEl.style.backgroundImage = `url('${placeholderImageUrl}')`;
 	}

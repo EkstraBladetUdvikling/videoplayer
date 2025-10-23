@@ -1,11 +1,9 @@
 import type { IRollsHandlerReturn } from './rolls/rollshandler';
 
-export interface IEBjwLive {
+export interface IJWLive {
 	channelId: string;
-	libraryDNS: string;
 	placeholderImageId: string;
 	placeholderImageUrl: string;
-	propertyId: string;
 	vodAllowed: boolean;
 }
 
@@ -45,7 +43,6 @@ export interface IInitJWOptions {
 	isDrEdition?: boolean;
 	isLive: boolean;
 	isSmartphone: boolean;
-	liveOptions?: IEBjwLive;
 	maxResolution: string;
 	playerElement: HTMLDivElement;
 	playerElementId: string;
