@@ -5,10 +5,10 @@
 	import VideoLiveHandler from './videolivehandler';
 	import type { IRollsHandlerReturn } from './rolls/rollshandler';
 
-	const { jwMaxResolution, jwLibraryDNS, jwPlayerId } = page.data;
+	const { jwLibraryDNS, jwPlayerId } = page.data;
 
 	interface VideoLivePlayerProps {
-		advertisingObject?: IRollsHandlerReturn | undefined | null;
+		advertisingObject?: IRollsHandlerReturn;
 		channelId: string;
 		floatingAllowed?: boolean;
 		imageUrl?: string;
@@ -39,10 +39,7 @@
 			initObjectJW: {
 				autoPause: true,
 				disableRolls: !advertisingObject,
-				// inline: false,
-				// isLive: true,
 				libraryDNS: jwLibraryDNS as string,
-				// maxResolution: jwMaxResolution,
 				playerElement,
 				playerElementId,
 				playerId: jwPlayerId,
@@ -56,9 +53,9 @@
 			},
 			autoPlayAllowed: true,
 			floatingAllowed,
-			rollsData: advertisingObject
+			rollsData: advertisingObject ?? null
 		};
-		console.log('video', video, advertisingObject);
+
 		new VideoLiveHandler(video);
 	});
 </script>

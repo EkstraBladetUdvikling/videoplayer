@@ -28,7 +28,6 @@ type IVideoHandlerOptionsFromJW = Pick<
 	| 'articleId'
 	| 'clipId'
 	| 'disableRolls'
-	| 'duration'
 	| 'fetchPlaylist'
 	| 'imageUrl'
 	| 'inline'
@@ -48,7 +47,7 @@ interface IVideoHandlerOptions {
 	autoPlayAllowed: IInitJWOptions['autoPlay'];
 	floatingAllowed: IInitJWOptions['allowFloating'];
 	initObjectJW: IVideoHandlerOptionsFromJW;
-	rollsData: IRollsHandlerReturn | null;
+	rollsData: IRollsHandlerReturn;
 }
 
 export default class VideoHandler {

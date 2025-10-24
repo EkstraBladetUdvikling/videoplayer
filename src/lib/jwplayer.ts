@@ -126,12 +126,12 @@ export class JWVideo {
 		 * Autoplay
 		 */
 		let blockAutoPlayOnAdError = false;
-		let vpaValue = 'click';
+		// let vpaValue = 'click';
 		if (autoplayAllowed) {
 			jwOptions.autostart = 'viewable';
 			jwOptions.mute = true;
 			blockAutoPlayOnAdError = true;
-			vpaValue = 'auto';
+			// vpaValue = 'auto';
 		} else {
 			jwOptions.autostart = false;
 			// Add poster video for non-autoplay videos
@@ -143,12 +143,12 @@ export class JWVideo {
 			});
 		}
 
-		if (location.hash === '#autoplay') {
-			jwOptions.autostart = true;
-			jwOptions.mute = false;
-			blockAutoPlayOnAdError = true;
-			vpaValue = 'auto';
-		}
+		// if (location.hash === '#autoplay') {
+		// 	jwOptions.autostart = true;
+		// 	jwOptions.mute = false;
+		// 	blockAutoPlayOnAdError = true;
+		// 	vpaValue = 'auto';
+		// }
 		// END Autoplay
 
 		if (!disableRolls) {
