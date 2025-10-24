@@ -22,7 +22,7 @@ export const createRollUrl = (rollUrlOptions: ICreateRollUrl) => {
 };
 
 export function createSchedule(
-	scheduleObject: Partial<jwplayer.AdvertisingConfig>,
+	scheduleObject: jwplayer.AdvertisingConfig,
 	keyValues: string,
 	custParams: string
 ) {

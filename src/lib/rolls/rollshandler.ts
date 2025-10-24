@@ -3,15 +3,17 @@ import { createSchedule } from './createrollurl';
 
 import type { IUrlFragments, TRollsHandler } from './types';
 
-export interface IRollsHandlerReturn {
+export interface IRollsHandlerDataReturn {
 	adUnitName: TRollsHandler['adUnitName'];
-	advertisingObject: Partial<jwplayer.AdvertisingConfig>;
+	advertisingObject: jwplayer.AdvertisingConfig;
 	urlFragments: IUrlFragments;
 }
 
+export type IRollsHandlerReturn = IRollsHandlerDataReturn | null;
+
 export async function rollsHandler(
 	rollsHandlerObject: TRollsHandler
-): Promise<IRollsHandlerReturn | null> {
+): Promise<IRollsHandlerReturn> {
 	try {
 		const {
 			adscheduleId,
@@ -33,7 +35,7 @@ export async function rollsHandler(
 
 		const keyValues = `&eids=jppol.dk,${anonId}`;
 
-		let advertisingObject: Partial<jwplayer.AdvertisingConfig> = {
+		let advertisingObject: jwplayer.AdvertisingConfig = {
 			client: 'googima',
 			creativeTimeout,
 			requestTimeout,
@@ -45,8 +47,6 @@ export async function rollsHandler(
 		if (scheduleObjectAlter) {
 			advertisingObject = scheduleObjectAlter;
 		}
-
-		console.log('equal?', JSON.stringify(advertisingObject) === JSON.stringify(scheduleObject));
 
 		return {
 			adUnitName,
@@ -60,6 +60,7 @@ export async function rollsHandler(
 			level: 'ERROR',
 			message: (error as Error).message
 		});
+
 		return null;
 	}
 }

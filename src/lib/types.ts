@@ -1,11 +1,28 @@
 import type { IRollsHandlerReturn } from './rolls/rollshandler';
 
+interface JWEventData {
+	created: string;
+	id: string;
+	last_modified: string;
+	master_access: {
+		expiration: string;
+		status: string;
+	};
+	master_expiration: string;
+	media_id: string;
+	metadata: { [id: string]: unknown };
+	published_at: string;
+	schema: null;
+	status: string;
+	type: string;
+}
+
 export interface IJWLive {
 	channelId: string;
 	placeholderImageId: string;
 	placeholderImageUrl: string;
 	vodAllowed: boolean;
-	vodFunction?: (channelId: string) => Promise<any[]>;
+	vodFunction?: (channelId: string) => Promise<JWEventData[]>;
 }
 
 export interface IRollOptions {
@@ -34,7 +51,6 @@ export interface IInitJWOptions {
 	clipId: string;
 	cookieless: boolean;
 	disableRolls: boolean;
-	duration: string;
 	// environment: 'prod' | 'staging' | 'dev';
 	fetchPlaylist: boolean;
 	floatingOptions?: IFloatingInitOptions;

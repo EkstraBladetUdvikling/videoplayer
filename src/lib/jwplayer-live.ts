@@ -2,7 +2,6 @@ import { blockUntilLoaded } from './blockuntilloaded';
 
 import { getFloatingPlayer } from './followplayer';
 
-// import type { TRollsHandler } from './advertisement/types';
 import type { IInitJWOptions, IJWLive } from './types';
 
 export type ILiveInitOptions = IJWLive &
@@ -17,6 +16,7 @@ export type ILiveInitOptions = IJWLive &
 		| 'libraryDNS'
 		| 'playerElementId'
 		| 'playerParent'
+		| 'rollsData'
 	>;
 
 export class JWVideoLIVE {
@@ -43,7 +43,6 @@ export class JWVideoLIVE {
 	};
 
 	constructor(optionsArg: ILiveInitOptions) {
-		console.log('JWPLIVE optionsArg', optionsArg);
 		this.init(optionsArg);
 	}
 
@@ -65,7 +64,7 @@ export class JWVideoLIVE {
 			const { placeholderImageId, playerElementId, playerParent } = this.options;
 
 			this.placeholderImage = document.getElementById(placeholderImageId) as HTMLImageElement;
-			console.log('JWPLIVE placeholderImage', this.placeholderImage, placeholderImageId);
+
 			/** The player on the page which we'll use for playback */
 
 			this.jwPlayerInstance = window.jwplayer(playerElementId) as jwplayer.JWPlayer;
@@ -87,7 +86,7 @@ export class JWVideoLIVE {
 	 * to start playing it.
 	 */
 	private checkChannelStatus() {
-		const { channelId, propertyId, playerElementId, vodAllowed } = this.options;
+		const { channelId, playerElementId, vodAllowed } = this.options;
 
 		if (!this.intervalId) {
 			// Make sure to execute this method every UPDATE_FREQUENCY milliseconds.
@@ -133,10 +132,7 @@ export class JWVideoLIVE {
 					vodAllowed &&
 					typeof this.options.vodFunction === 'function'
 				) {
-					console.log('Playing VOD as fallback for live stream', this.options.vodFunction);
-
 					this.options.vodFunction(channelId).then((responseData) => {
-						console.log('JWPLIVE getSiteChannelsEvents responseData', responseData);
 						if (responseData.length) {
 							const completeEvent = responseData.find(
 								(recentVideoEvent) => recentVideoEvent.status === 'completed'
@@ -180,13 +176,6 @@ export class JWVideoLIVE {
 				} else if (this.placeholderImage && this.isPlayingClip === false) {
 					showPlaceholder = true;
 				}
-
-				console.log(
-					'JWPLIVE showPlaceholder',
-					channelStatus.status,
-					'showPlaceholder',
-					showPlaceholder
-				);
 
 				if (showPlaceholder) {
 					this.placeholderImage.style.display = 'block';
@@ -307,24 +296,14 @@ export class JWVideoLIVE {
 	}
 
 	private async setupPlayer(setupOptions: Partial<jwplayer.PlayerConfig>) {
-		console.log('JWLive setupPlayer', this.hasBeenSetup);
 		if (this.hasBeenSetup) return;
 
 		const {
 			allowFloating = false,
-			// actAsPlay,
-			// articleId,
 			autoPause,
 			cookieless,
-
-			// inline,
-			// isDiscovery,
-
-			// longboatVideoObject,
-
-			playerElementId
-
-			// rollOptions
+			playerElementId,
+			rollsData
 		} = this.options;
 
 		const { placeholderImageUrl } = this.options;
@@ -339,23 +318,8 @@ export class JWVideoLIVE {
 			this.placeholderImage.style.display = 'none';
 		}
 
-		// const { disableRolls } = this;
+		const { disableRolls } = this;
 
-		// const rollsStuff: TRollsHandler = {
-		// 	...rollOptions,
-		// 	actAsPlay,
-		// 	articleId,
-		// 	autoplayAllowed: this.autoplayAllowed,
-		// 	cookieless,
-		// 	disableRolls,
-		// 	inline,
-		// 	isCtp: false,
-		// 	isDiscovery,
-		// 	isSmartphone,
-		// 	playerParent
-		// };
-
-		// const advertising = await rollsHandler(rollsStuff);
 		const floating = getFloatingPlayer(allowFloating);
 
 		const jwOptions: Partial<jwplayer.PlayerConfig> = {
@@ -364,11 +328,19 @@ export class JWVideoLIVE {
 			image: placeholderImageUrl
 		};
 
+		if (!disableRolls && rollsData) {
+			const defaultAdvertising = window.jwplayer?.defaults.advertising ?? {};
+			jwOptions.advertising = rollsData
+				? {
+						...defaultAdvertising,
+						...rollsData.advertisingObject
+					}
+				: defaultAdvertising;
+		}
+
 		if (cookieless) {
 			jwOptions.doNotSaveCookies = true;
 		}
-
-		// jwOptions.advertising = advertising ? advertising.advertisingObject : {};
 
 		/**
 		 * Autopause
@@ -379,7 +351,7 @@ export class JWVideoLIVE {
 			};
 		}
 		// END Autoplay
-		console.log('this.autoplayAllowed', this.autoplayAllowed);
+
 		if (this.autoplayAllowed) {
 			jwOptions.autostart = 'viewable';
 			jwOptions.mute = true;
@@ -388,17 +360,6 @@ export class JWVideoLIVE {
 		}
 
 		this.jwPlayerInstance?.setup(jwOptions);
-
-		// if (floating) {
-		// 	new FloatingPlayer({
-		// 		articleTitleLength,
-		// 		floatAllowed,
-		// 		isSmartphone,
-		// 		jwPlayerInstance: this.jwPlayerInstance,
-		// 		playerElementId,
-		// 		playerParent
-		// 	});
-		// }
 
 		this.jwPlayerInstance?.on('ready', () => {
 			this.updatePoster();
