@@ -318,8 +318,6 @@ export class JWVideoLIVE {
 			this.placeholderImage.style.display = 'none';
 		}
 
-		const { disableRolls } = this;
-
 		const floating = getFloatingPlayer(allowFloating);
 
 		const jwOptions: Partial<jwplayer.PlayerConfig> = {
@@ -328,15 +326,21 @@ export class JWVideoLIVE {
 			image: placeholderImageUrl
 		};
 
-		if (!disableRolls && rollsData) {
-			const defaultAdvertising = window.jwplayer?.defaults.advertising ?? {};
-			jwOptions.advertising = rollsData
-				? {
-						...defaultAdvertising,
-						...rollsData.advertisingObject
-					}
-				: defaultAdvertising;
-		}
+		/**
+     * Disable rolls always for now
+    // const { disableRolls } = this;
+      if (!disableRolls && rollsData) {
+        const defaultAdvertising = window.jwplayer?.defaults.advertising ?? {};
+        jwOptions.advertising = rollsData
+          ? {
+              ...defaultAdvertising,
+              ...rollsData.advertisingObject
+            }
+          : defaultAdvertising;
+      } else {
+    */
+		jwOptions.advertising = undefined;
+		// }
 
 		if (cookieless) {
 			jwOptions.doNotSaveCookies = true;

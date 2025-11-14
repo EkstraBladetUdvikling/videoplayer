@@ -159,6 +159,8 @@ export class JWVideo {
 						...rollsData.advertisingObject
 					}
 				: defaultAdvertising;
+		} else {
+			jwOptions.advertising = undefined;
 		}
 
 		// if (!rollsObject.disableRolls) {
