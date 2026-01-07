@@ -1,5 +1,5 @@
 <script lang="ts">
-	import AdInit from '@ekstra-bladet/display-ads/src/lib/AdInit.svelte';
+	import AdInit from '@ekstrabladetudvikling/display-ads/src/lib/AdInit.svelte';
 
 	import { browser } from '$app/environment';
 	import { afterNavigate } from '$app/navigation';
