@@ -2,17 +2,11 @@
 # yarn lockfile v1
 
 
-"@ekstra-bladet/eb-cmp@^3.0.1":
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/@ekstra-bladet/eb-cmp/-/eb-cmp-3.0.3.tgz#a2f199e668c7c4f7c7845802d0fb1e1bcc5036fa"
-  integrity sha512-kjBBxCELhO9qBqdGSuGc8/tDyNVKei8tusPef5iVoC4UtiBzTjj1l458hiiaH5qo1bCy2zogb2lRnSFft09vbg==
-
-"@ekstrabladetudvikling/display-ads@0.4.0":
-  version "0.4.0"
-  resolved "https://npm.pkg.github.com/download/@ekstrabladetudvikling/display-ads/0.4.0/9e7bab1ffb8304dd65cfddc96c945040ebd9da20#9e7bab1ffb8304dd65cfddc96c945040ebd9da20"
-  integrity sha512-8Wx476gcDXdFE0XlWhxpeeck5VIULYeLipu7SMTPbBSEFAjQ15nkI5B6ONh/16Fd33Zj/247wFb17+jPo8y8lQ==
+"@ekstrabladetudvikling/display-ads@1.0.4":
+  version "1.0.4"
+  resolved "https://npm.pkg.github.com/download/@ekstrabladetudvikling/display-ads/1.0.4/7ddbf7a8d589a571ee207786ec2209c518fffafb#7ddbf7a8d589a571ee207786ec2209c518fffafb"
+  integrity sha512-tNVl/MVcPlnKQCDQ/t2pvXesX99RMJTMeeEUQDYjbLNHJs3/CQ2uOPJCEhbtu+FeGvesci43GT6uEwN67j+Ifg==
   dependencies:
-    "@ekstra-bladet/eb-cmp" "^3.0.1"
     "@types/googletag" "^3.3.0"
     "@types/jwplayer" "^8.31.3"
 

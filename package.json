@@ -13,7 +13,7 @@
 		"lint": "prettier --check . && eslint ."
 	},
 	"devDependencies": {
-		"@ekstrabladetudvikling/display-ads": "0.4.0",
+		"@ekstrabladetudvikling/display-ads": "1.0.4",
 		"@eslint/compat": "^2.0.0",
 		"@eslint/js": "^9.39.2",
 		"@sveltejs/adapter-auto": "^7.0.0",

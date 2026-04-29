@@ -234,8 +234,9 @@ export class JWVideo {
 			autoplayAllowed = false;
 		});
 
-		if (rollsData)
+		if (rollsData && !disableRolls) {
 			liveWrapped(rollsData.adUnitName, jwPlayerInstance, playerElementId, rollsData.urlFragments);
+		}
 
 		return { blockAutoPlayOnAdError, jwPlayerInstance };
 	};
