@@ -84,13 +84,19 @@ export default class VideoLiveHandler extends EmitterClass {
 		};
 
 		const jwvideoLIVE = new JWVideoLIVE(liveInitObject);
+		this.forwardEventsFrom(jwvideoLIVE);
 
-		jwvideoLIVE.on('playerReady', ({ playerInstance }) => {
-			if (!playerInstance) this.emit('error', { message: 'Player instance is not available' });
-			const videoElement = playerInstance.getContainer().querySelector('video.jw-video');
-			console.log(videoElement);
+		// jwvideoLIVE.on('playerReady', (eventData) => {
+		// 	const playerInstance = eventData?.playerInstance;
 
-			this.emit('playerReady', { playerInstance, videoElement });
-		});
+		// 	console.log('VIDEOHANDLER playerInstance', playerInstance);
+		// 	if (!playerInstance) this.emit('error', { message: 'Player instance is not available' });
+		// 	console.log('VIDEOHANDLER container', playerInstance.getContainer());
+
+		// 	const videoElement = playerInstance.getContainer().querySelector('video.jw-video');
+		// 	console.log('VIDEOHANDLER videoElement', videoElement);
+
+		// 	this.emit('playerReady', { playerInstance, videoElement });
+		// });
 	}
 }

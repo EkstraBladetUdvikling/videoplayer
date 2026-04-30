@@ -79,8 +79,6 @@ export default class VideoHandler extends EmitterClass {
 			...initObjectJW
 		};
 
-		console.log('initObject', initObject);
-
 		// 	const isPreview = window.location.search.indexOf('token') !== -1;
 		// 	if (isPreview) {
 		// 		addJWPlayer(libraryDNS, playerId);
@@ -127,13 +125,6 @@ export default class VideoHandler extends EmitterClass {
 		addJWPlayer(libraryDNS, playerId);
 
 		const jwvideo = new JWVideo(initObject);
-
-		jwvideo.on('playerReady', ({ playerInstance }) => {
-			if (!playerInstance) this.emit('error', { message: 'Player instance is not available' });
-			const videoElement = playerInstance.getContainer().querySelector('video.jw-video');
-			console.log(videoElement);
-
-			this.emit('playerReady', { playerInstance, videoElement });
-		});
+		this.forwardEventsFrom(jwvideo);
 	}
 }

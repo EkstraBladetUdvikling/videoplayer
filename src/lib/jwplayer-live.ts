@@ -369,7 +369,17 @@ export class JWVideoLIVE extends EmitterClass {
 
 		this.jwPlayerInstance?.on('ready', () => {
 			this.updatePoster();
-			this.emit('playerReady', { playerInstance: this.jwPlayerInstance });
+			const videoElement = this.jwPlayerInstance.getContainer().querySelector('video.jw-video');
+
+			this.emit('playerReady', { videoElement });
+		});
+
+		this.jwPlayerInstance?.on('adBreakStart', () => {
+			this.emit('adBreakStart');
+		});
+
+		this.jwPlayerInstance?.on('play', () => {
+			this.emit('play', { autoPlay: jwOptions.autostart === 'viewable' });
 		});
 
 		this.jwPlayerInstance?.on('autostartNotAllowed', () => {

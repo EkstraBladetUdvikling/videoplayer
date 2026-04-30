@@ -200,6 +200,20 @@ export class JWVideo extends EmitterClass {
 
 		jwPlayerInstance.setup(jwOptions);
 
+		jwPlayerInstance.on('ready', () => {
+			const videoElement = this.jwPlayerInstance.getContainer().querySelector('video.jw-video');
+
+			this.emit('playerReady', { videoElement });
+		});
+
+		jwPlayerInstance.on('adBreakStart', () => {
+			this.emit('adBreakStart');
+		});
+
+		jwPlayerInstance.on('play', () => {
+			this.emit('play', { autoPlay: jwOptions.autostart === 'viewable' });
+		});
+
 		// if (await window.eb.ready('ebLib')) {
 		// 	window.playPauseHandler =
 		// 		window.playPauseHandler || new window.ebComponents.ebLib.PlayPauseHandler();
@@ -243,10 +257,6 @@ export class JWVideo extends EmitterClass {
 		if (rollsData && !disableRolls) {
 			liveWrapped(rollsData.adUnitName, jwPlayerInstance, playerElementId, rollsData.urlFragments);
 		}
-
-		this.jwPlayerInstance?.on('ready', () => {
-			this.emit('playerReady', { playerInstance: this.jwPlayerInstance });
-		});
 
 		return { blockAutoPlayOnAdError, jwPlayerInstance };
 	};
