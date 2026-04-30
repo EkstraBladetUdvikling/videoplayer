@@ -1,3 +1,4 @@
+import EmitterClass from './emitterclass';
 import { JWVideo } from './jwplayer';
 import type { IRollsHandlerReturn } from './rolls/rollshandler';
 // import { JWVideoLIVE } from './jwplayer-live';
@@ -50,8 +51,9 @@ interface IVideoHandlerOptions {
 	rollsData: IRollsHandlerReturn;
 }
 
-export default class VideoHandler {
+export default class VideoHandler extends EmitterClass {
 	constructor(videoOptions: IVideoHandlerOptions) {
+		super();
 		const { autoPlayAllowed = false, floatingAllowed, initObjectJW, rollsData } = videoOptions;
 
 		const { isLive, libraryDNS, playerId } = initObjectJW;
@@ -62,18 +64,6 @@ export default class VideoHandler {
 		}
 
 		const volume = 100;
-
-		// const rollOptions = {
-		// 	adscheduleId: '${section.parameters[adscheduleSecParam]}',
-		// 	adschedulePath: 'https://cdn.jwplayer.com/v2/advertising/schedules/',
-		// 	articleTypeName: '${article.articleTypeName}',
-		// 	creativeTimeout: '60000', //  '${ section.parameters[creativeTimeoutParam] }' || '60000',
-		// 	disableRolls,
-		// 	requestTimeout: '60000', // '${ section.parameters[requestTimeoutParam] }' || '60000',
-		// 	sectionPath: '${ video.sectionPath }',
-		// 	type: 'ptv', // '${ section.parameters["video.advertising.type"] }' || 'ptv',
-		// 	videoType: '${ video.context }'
-		// };
 
 		const initObject = {
 			autoPlay,
@@ -136,6 +126,14 @@ export default class VideoHandler {
 
 		addJWPlayer(libraryDNS, playerId);
 
-		new JWVideo(initObject);
+		const jwvideo = new JWVideo(initObject);
+
+		jwvideo.on('playerReady', ({ playerInstance }) => {
+			if (!playerInstance) this.emit('error', { message: 'Player instance is not available' });
+			const videoElement = playerInstance.getContainer().querySelector('video.jw-video');
+			console.log(videoElement);
+
+			this.emit('playerReady', { playerInstance, videoElement });
+		});
 	}
 }

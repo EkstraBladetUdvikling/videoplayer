@@ -1,6 +1,7 @@
 import type { IRollsHandlerReturn } from './rolls/rollshandler';
 import { JWVideoLIVE, type ILiveInitOptions } from './jwplayer-live';
 import type { IInitJWOptions } from './types';
+import EmitterClass from './emitterclass';
 
 function addJWPlayer(libraryDNS: string, playerId: string) {
 	const script = document.createElement('script');
@@ -28,8 +29,9 @@ interface IVideoHandlerOptions {
 	rollsData: IRollsHandlerReturn;
 }
 
-export default class VideoLiveHandler {
+export default class VideoLiveHandler extends EmitterClass {
 	constructor(videoOptions: IVideoHandlerOptions) {
+		super();
 		const { autoPlayAllowed = true, floatingAllowed, initObjectJW, rollsData } = videoOptions;
 
 		const { disableRolls, libraryDNS, playerId } = initObjectJW;
@@ -81,6 +83,14 @@ export default class VideoLiveHandler {
 			vodFunction
 		};
 
-		new JWVideoLIVE(liveInitObject);
+		const jwvideoLIVE = new JWVideoLIVE(liveInitObject);
+
+		jwvideoLIVE.on('playerReady', ({ playerInstance }) => {
+			if (!playerInstance) this.emit('error', { message: 'Player instance is not available' });
+			const videoElement = playerInstance.getContainer().querySelector('video.jw-video');
+			console.log(videoElement);
+
+			this.emit('playerReady', { playerInstance, videoElement });
+		});
 	}
 }

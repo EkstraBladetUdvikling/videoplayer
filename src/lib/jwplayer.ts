@@ -8,11 +8,13 @@ import type { IInitJWOptions, ISetupJWOptions } from './types';
 
 import { getFloatingPlayer } from './followplayer';
 import { liveWrapped } from './rolls/livewrapped';
+import EmitterClass from './emitterclass';
 
-export class JWVideo {
+export class JWVideo extends EmitterClass {
 	private jwPlayerInstance: jwplayer.JWPlayer | null = null;
 
 	constructor(initOptions: IInitJWOptions) {
+		super();
 		try {
 			if (initOptions.isDiscovery) {
 				this.checkDiscovery(initOptions);
@@ -26,6 +28,10 @@ export class JWVideo {
 				message: (error as Error).message
 			});
 		}
+	}
+
+	public getPlayerInstance() {
+		return this.jwPlayerInstance;
 	}
 
 	private async checkDiscovery(checkDiscoveryOptions: IInitJWOptions) {
@@ -237,6 +243,10 @@ export class JWVideo {
 		if (rollsData && !disableRolls) {
 			liveWrapped(rollsData.adUnitName, jwPlayerInstance, playerElementId, rollsData.urlFragments);
 		}
+
+		this.jwPlayerInstance?.on('ready', () => {
+			this.emit('playerReady', { playerInstance: this.jwPlayerInstance });
+		});
 
 		return { blockAutoPlayOnAdError, jwPlayerInstance };
 	};

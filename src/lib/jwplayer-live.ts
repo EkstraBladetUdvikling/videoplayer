@@ -1,4 +1,5 @@
 import { blockUntilLoaded } from './blockuntilloaded';
+import EmitterClass from './emitterclass';
 
 import { getFloatingPlayer } from './followplayer';
 
@@ -19,7 +20,7 @@ export type ILiveInitOptions = IJWLive &
 		| 'rollsData'
 	>;
 
-export class JWVideoLIVE {
+export class JWVideoLIVE extends EmitterClass {
 	private autoplayAllowed: boolean = true;
 	private currentEventId: string = '';
 	private disableRolls!: boolean;
@@ -43,6 +44,7 @@ export class JWVideoLIVE {
 	};
 
 	constructor(optionsArg: ILiveInitOptions) {
+		super();
 		this.init(optionsArg);
 	}
 
@@ -367,6 +369,7 @@ export class JWVideoLIVE {
 
 		this.jwPlayerInstance?.on('ready', () => {
 			this.updatePoster();
+			this.emit('playerReady', { playerInstance: this.jwPlayerInstance });
 		});
 
 		this.jwPlayerInstance?.on('autostartNotAllowed', () => {
