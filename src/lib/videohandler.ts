@@ -1,3 +1,4 @@
+import EmitterClass from './emitterclass';
 import { JWVideo } from './jwplayer';
 import type { IRollsHandlerReturn } from './rolls/rollshandler';
 // import { JWVideoLIVE } from './jwplayer-live';
@@ -50,8 +51,9 @@ interface IVideoHandlerOptions {
 	rollsData: IRollsHandlerReturn;
 }
 
-export default class VideoHandler {
+export default class VideoHandler extends EmitterClass {
 	constructor(videoOptions: IVideoHandlerOptions) {
+		super();
 		const { autoPlayAllowed = false, floatingAllowed, initObjectJW, rollsData } = videoOptions;
 
 		const { isLive, libraryDNS, playerId } = initObjectJW;
@@ -62,18 +64,6 @@ export default class VideoHandler {
 		}
 
 		const volume = 100;
-
-		// const rollOptions = {
-		// 	adscheduleId: '${section.parameters[adscheduleSecParam]}',
-		// 	adschedulePath: 'https://cdn.jwplayer.com/v2/advertising/schedules/',
-		// 	articleTypeName: '${article.articleTypeName}',
-		// 	creativeTimeout: '60000', //  '${ section.parameters[creativeTimeoutParam] }' || '60000',
-		// 	disableRolls,
-		// 	requestTimeout: '60000', // '${ section.parameters[requestTimeoutParam] }' || '60000',
-		// 	sectionPath: '${ video.sectionPath }',
-		// 	type: 'ptv', // '${ section.parameters["video.advertising.type"] }' || 'ptv',
-		// 	videoType: '${ video.context }'
-		// };
 
 		const initObject = {
 			autoPlay,
@@ -88,8 +78,6 @@ export default class VideoHandler {
 			volume,
 			...initObjectJW
 		};
-
-		console.log('initObject', initObject);
 
 		// 	const isPreview = window.location.search.indexOf('token') !== -1;
 		// 	if (isPreview) {
@@ -136,6 +124,7 @@ export default class VideoHandler {
 
 		addJWPlayer(libraryDNS, playerId);
 
-		new JWVideo(initObject);
+		const jwvideo = new JWVideo(initObject);
+		this.forwardEventsFrom(jwvideo);
 	}
 }

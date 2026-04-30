@@ -8,11 +8,13 @@ import type { IInitJWOptions, ISetupJWOptions } from './types';
 
 import { getFloatingPlayer } from './followplayer';
 import { liveWrapped } from './rolls/livewrapped';
+import EmitterClass from './emitterclass';
 
-export class JWVideo {
+export class JWVideo extends EmitterClass {
 	private jwPlayerInstance: jwplayer.JWPlayer | null = null;
 
 	constructor(initOptions: IInitJWOptions) {
+		super();
 		try {
 			if (initOptions.isDiscovery) {
 				this.checkDiscovery(initOptions);
@@ -26,6 +28,10 @@ export class JWVideo {
 				message: (error as Error).message
 			});
 		}
+	}
+
+	public getPlayerInstance() {
+		return this.jwPlayerInstance;
 	}
 
 	private async checkDiscovery(checkDiscoveryOptions: IInitJWOptions) {
@@ -194,6 +200,20 @@ export class JWVideo {
 
 		jwPlayerInstance.setup(jwOptions);
 
+		jwPlayerInstance.on('ready', () => {
+			const videoElement = this.jwPlayerInstance.getContainer().querySelector('video.jw-video');
+
+			this.emit('playerReady', { videoElement });
+		});
+
+		jwPlayerInstance.on('adBreakStart', () => {
+			this.emit('adBreakStart');
+		});
+
+		jwPlayerInstance.on('play', () => {
+			this.emit('play', { autoPlay: jwOptions.autostart === 'viewable' });
+		});
+
 		// if (await window.eb.ready('ebLib')) {
 		// 	window.playPauseHandler =
 		// 		window.playPauseHandler || new window.ebComponents.ebLib.PlayPauseHandler();
@@ -234,8 +254,9 @@ export class JWVideo {
 			autoplayAllowed = false;
 		});
 
-		if (rollsData)
+		if (rollsData && !disableRolls) {
 			liveWrapped(rollsData.adUnitName, jwPlayerInstance, playerElementId, rollsData.urlFragments);
+		}
 
 		return { blockAutoPlayOnAdError, jwPlayerInstance };
 	};
