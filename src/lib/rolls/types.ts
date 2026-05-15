@@ -21,5 +21,6 @@ export type TRollsHandler = {
 export interface IUrlFragments {
 	custParams: string;
 	keyValues: string;
+	keyValuesObject: Record<string, string>;
 	url: string;
 }

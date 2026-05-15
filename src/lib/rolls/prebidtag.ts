@@ -1,7 +1,10 @@
-import { createRollUrl } from './createrollurl';
 import type { IUrlFragments, TRollsHandler } from './types';
 
-const performAsyncBidding = async (adUnitName: string, tagId: string) => {
+const performAsyncBidding = async (
+	adUnitName: string,
+	tagId: string,
+	keyValuesObject?: Record<string, string>
+) => {
 	return new Promise((resolve) => {
 		// Livewrapped will run the auction. Once the auction has run,
 		// the video.callback will be called with a video url as a parameter
@@ -19,6 +22,7 @@ const performAsyncBidding = async (adUnitName: string, tagId: string) => {
 					return {
 						adUnit: prebidAdUnit,
 						params: {
+							...keyValuesObject,
 							iu: gamAdUnit,
 							output: 'vast'
 						}
@@ -30,14 +34,13 @@ const performAsyncBidding = async (adUnitName: string, tagId: string) => {
 		return videoUrl;
 	});
 };
-
 // Timeout in case Livewrapped doesn't load.
 const FAILSAFE_TIMEOUT = 3000;
 
 export async function getPrebidTag(
 	adUnitName: TRollsHandler['adUnitName'],
 	playerElementId: string,
-	urlFragments: IUrlFragments
+	keyValuesObject: IUrlFragments['keyValuesObject']
 ) {
 	// Resolve when Livewrapped handles queue, otherwise timeout.
 	const pbjsLoaded = new Promise((resolve, reject) => {
@@ -48,24 +51,9 @@ export async function getPrebidTag(
 	if (!window.lwhb) return;
 
 	return pbjsLoaded // Wait until Livewrapped is loaded.
-		.then(() => performAsyncBidding(adUnitName, playerElementId)) // Run auction.
+		.then(() => performAsyncBidding(adUnitName, playerElementId, keyValuesObject)) // Run auction.
 		.then(async (lwhbRollTag: unknown) => {
-			// Update the playlist item.
-			const hbData = (lwhbRollTag as string).match(/\?(?:[^&]*&)*(cust_params)=([^&]+)/);
-
-			const hbParams = hbData && hbData[2] ? decodeURIComponent(hbData[2]) : '';
-
-			if (urlFragments) {
-				const { custParams, keyValues, url } = urlFragments;
-
-				const rollTag = createRollUrl({
-					scheduleUrl: url,
-					keyValues,
-					custParams: `${custParams}&${hbParams}`
-				});
-
-				return rollTag;
-			}
+			return lwhbRollTag as string;
 		})
 		.catch(() => null);
 }

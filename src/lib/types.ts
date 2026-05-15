@@ -48,6 +48,7 @@ export interface IInitJWOptions {
 	articleId: string;
 	autoPause: boolean;
 	autoPlay: boolean;
+	custParamsObject?: Record<string, string>;
 	clipId: string;
 	cookieless: boolean;
 	disableRolls: boolean;

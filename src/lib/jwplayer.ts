@@ -255,7 +255,11 @@ export class JWVideo extends EmitterClass {
 		});
 
 		if (rollsData && !disableRolls) {
-			liveWrapped(rollsData.adUnitName, jwPlayerInstance, playerElementId, rollsData.urlFragments);
+			const custParamsObject = rollsData.urlFragments.keyValuesObject
+				? rollsData.urlFragments.keyValuesObject
+				: undefined;
+
+			liveWrapped(rollsData.adUnitName, jwPlayerInstance, playerElementId, custParamsObject);
 		}
 
 		return { blockAutoPlayOnAdError, jwPlayerInstance };

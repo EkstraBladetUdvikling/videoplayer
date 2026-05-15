@@ -5,7 +5,7 @@ export function liveWrapped(
 	adUnitName: TRollsHandler['adUnitName'],
 	jwPlayerInstance: jwplayer.JWPlayer,
 	playerElementId: string,
-	urlFragments: IUrlFragments
+	urlFragments: IUrlFragments['keyValuesObject'] = {}
 ) {
 	// console.log('liveWrapped', adUnitName, jwPlayerInstance, playerElementId, urlFragments);
 	if (adUnitName) {
@@ -13,7 +13,7 @@ export function liveWrapped(
 		// console.log('liveWrapped', adUnitName, jwPlayerInstance, playerElementId, urlFragments);
 		jwPlayerInstance.setPlaylistItemCallback(async (item) => {
 			const tag = await getPrebidTag(adUnitName, playerElementId, urlFragments);
-			// console.log('tag', tag);
+
 			return Object.assign({}, item, {
 				adschedule: [
 					{
