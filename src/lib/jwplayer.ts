@@ -152,13 +152,15 @@ export class JWVideo extends EmitterClass {
 			// vpaValue = 'auto';
 		} else {
 			jwOptions.autostart = false;
+
 			// Add poster video for non-autoplay videos
-			const firstItem = body.playlist[0];
-			firstItem.images.push({
-				src: `https://cdn.jwplayer.com/v2/media/${clipId}/poster.mp4?width=640`,
-				type: 'video/mp4',
-				width: 640
-			});
+			if (jwOptions.playlist && jwOptions.playlist[0] && jwOptions.playlist[0].images) {
+				jwOptions.playlist[0].images.push({
+					src: `https://cdn.jwplayer.com/v2/media/${clipId}/poster.mp4?width=640`,
+					type: 'video/mp4',
+					width: 640
+				});
+			}
 		}
 
 		// if (location.hash === '#autoplay') {
