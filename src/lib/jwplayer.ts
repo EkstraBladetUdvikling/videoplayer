@@ -82,6 +82,7 @@ export class JWVideo extends EmitterClass {
 			recommendationId,
 			title,
 			clipId,
+			clipType,
 			volume,
 			rollsData
 		} = configObject;
@@ -105,19 +106,30 @@ export class JWVideo extends EmitterClass {
 
 		const maxRes = `max_resolution=${maxResolution ? maxResolution : '960'}`;
 
-		const playlist = recommendationId
-			? `//${libraryDNS}/v2/media/${clipId}?recommendations_playlist_id=${recommendationId}&${maxRes}`
-			: `//${libraryDNS}/v2/media/${clipId}?${maxRes}`;
-
-		const response = await fetch(playlist);
-		const body = await response.json();
-		body.playlist[0].title = title;
-
 		const jwOptions: Partial<jwplayer.PlayerConfig> = {
 			floating,
-			image: imageUrl,
-			playlist: body.playlist
+			image: imageUrl
 		};
+
+		if (clipType === 'nent') {
+			try {
+				const nentInfoSource = `https://embed.viaplay.com/config/adinfo/${clipId}?referer=eb.dk&partnerId=355f1874-4d88-40ad-8dac-353551486f89`;
+				const nentInfo = await fetch(nentInfoSource).then((res) => res.json());
+				jwOptions.file = nentInfo.embedded.content.data.stream;
+			} catch (error) {
+				throw new Error(`Failed to fetch NENT info: ${(error as Error).message}`);
+			}
+		} else {
+			const playlist = recommendationId
+				? `//${libraryDNS}/v2/media/${clipId}?recommendations_playlist_id=${recommendationId}&${maxRes}`
+				: `//${libraryDNS}/v2/media/${clipId}?${maxRes}`;
+
+			const response = await fetch(playlist);
+			const body = await response.json();
+			body.playlist[0].title = title;
+
+			jwOptions.playlist = body.playlist;
+		}
 
 		/**
 		 * Autopause
