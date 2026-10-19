@@ -50,6 +50,7 @@ export interface IInitJWOptions {
 	autoPlay: boolean;
 	custParamsObject?: Record<string, string>;
 	clipId: string;
+	clipType?: string;
 	cookieless: boolean;
 	disableRolls: boolean;
 	// environment: 'prod' | 'staging' | 'dev';
