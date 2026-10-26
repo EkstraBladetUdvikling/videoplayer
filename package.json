@@ -1,6 +1,6 @@
 {
 	"name": "@ekstrabladetudvikling/videoplayer",
-	"version": "0.5.3",
+	"version": "0.5.5",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -36,5 +36,12 @@
 	},
 	"publishConfig": {
 		"registry": "https://npm.pkg.github.com"
+	},
+	"devEngines": {
+		"packageManager": {
+			"name": "yarn",
+			"version": "1.22.22",
+			"onFail": "download"
+		}
 	}
 }
